@@ -70,7 +70,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left;vertical-align:top}
 th{color:var(--muted);font-weight:600}
 .tablewrap{overflow-x:auto}
-th:not(:nth-child(5)):not(:nth-child(6)),td:not(:nth-child(5)):not(:nth-child(6)){white-space:nowrap}
+th:not(:nth-child(5)):not(:nth-child(6)):not(:nth-child(7)),td:not(:nth-child(5)):not(:nth-child(6)):not(:nth-child(7)){white-space:nowrap}
 td.good{color:var(--green);font-weight:700} td.bad{color:var(--red);font-weight:700}
 tr.now{background:color-mix(in srgb,var(--gold) 14%,transparent)}
 .chk{position:absolute;top:10px;right:10px;font-size:12px;padding:2px 8px;border-radius:999px}
@@ -245,6 +245,7 @@ function render(){
       <td>${t.getGanZhi()}</td>
       <td class="${g?'good':'bad'}">${t.getTianShen()}<br>${t.getTianShenLuck()}</td>
       <td>冲${t.getChongDesc()}<br>煞${t.getSha()}</td>
+      <td>${P.hourSha(l,t).map(([x,b])=>`<span class="htag chip ${b?'bad':'good'}">${x}</span>`).join('')||'—'}<br><span class="song">${t.getNineStar().toString()}</span></td>
       <td>${t.getYi().join(' ')}</td>
       <td>${t.getJi().join(' ')}</td>
       <td>财${t.getPositionCaiDesc()}<br>喜${t.getPositionXiDesc()}</td>
@@ -328,7 +329,7 @@ function render(){
   <section class="card span2">${chkBtn('时辰')}
     <h2>时辰吉凶</h2>
     <div class="tablewrap"><table>
-      <thead><tr><th>时辰</th><th>干支</th><th>天神</th><th>冲煞</th><th>宜</th><th>忌</th><th>方位</th>${me?'<th>与你</th>':''}</tr></thead>
+      <thead><tr><th>时辰</th><th>干支</th><th>天神</th><th>冲煞</th><th>神煞</th><th>宜</th><th>忌</th><th>方位</th>${me?'<th>与你</th>':''}</tr></thead>
       <tbody>${timeRows}</tbody>
     </table></div>
   </section>`;

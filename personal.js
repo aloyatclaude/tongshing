@@ -184,5 +184,21 @@ function hourTags(n, t){
   return tags;
 }
 
-return {GAN, ZHI, WX, GAN_WX, ZHI_WX, SX, SS_DESC, SHA_DESC, PALACE_SHORT, shiShen, shiShenZhi, build, today, hourTags, gi, zi};
+// 时家神煞：以当日干支对时辰（规则版，可能与个别通胜版本不同）
+const JIELU = {甲:'申酉',己:'申酉',乙:'午未',庚:'午未',丙:'辰巳',辛:'辰巳',丁:'寅卯',壬:'寅卯',戊:'子丑',癸:'子丑'};
+function hourSha(l, t){
+  const dg = l.getDayGan(), dz = l.getDayZhi(), hg = t.getGan(), hz = t.getZhi(), out = [];
+  if (GUIREN[dg].includes(hz)) out.push(['天乙贵人',0]);
+  if (LU[dg] === hz) out.push(['日禄',0]);
+  if (WENCHANG[dg] === hz) out.push(['文昌',0]);
+  if (hz === dz) out.push(['日建',0]);
+  zhiRel(hz, dz).forEach(r => out.push([{冲:'日破',六合:'日合',三合:'三合',害:'日害',破:'六破',刑:'日刑'}[r.t], r.bad?1:0]));
+  if (ganHe(hg, dg)) out.push(['干合',0]);
+  if (shiShen(dg, hg) === '七杀') out.push(['五不遇',1]);
+  if (JIELU[dg].includes(hz)) out.push(['截路空亡',1]);
+  if (l.getDayXunKong().includes(hz)) out.push(['旬空',1]);
+  return out;
+}
+
+return {GAN, ZHI, WX, GAN_WX, ZHI_WX, SX, SS_DESC, SHA_DESC, PALACE_SHORT, shiShen, shiShenZhi, build, today, hourTags, hourSha, gi, zi};
 })();

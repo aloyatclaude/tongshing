@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "keywords": [],
   "author": "",
@@ -12,5 +14,8 @@
   "type": "commonjs",
   "dependencies": {
     "lunar-javascript": "^1.7.7"
+  },
+  "devDependencies": {
+    "wrangler": "^4.148.0"
   }
 }
