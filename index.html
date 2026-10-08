@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>每日通胜</title>
+<script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.7/lunar.js"></script>
+<script src="personal.js"></script>
+<style>
+:root{
+  --bg:#f6efe2; --paper:#fffaf0; --ink:#2a2118; --muted:#7a6a58; --line:#e2d4bc;
+  --red:#b3261e; --red-soft:#f6dcd6; --green:#2f6b3a; --green-soft:#dcebd9; --gold:#a87a1e;
+  --wood:#3f8f4a; --fire:#d2452f; --earth:#b8862b; --metal:#8c8c8c; --water:#2f6fb3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16120e; --paper:#211b15; --ink:#efe4d2; --muted:#a8977f; --line:#3a3027;
+    --red:#ef7a6c; --red-soft:#3d1f1b; --green:#8fcf95; --green-soft:#1c2f1e; --gold:#e0b45a;
+    --metal:#b9b9b9;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16120e; --paper:#211b15; --ink:#efe4d2; --muted:#a8977f; --line:#3a3027;
+  --red:#ef7a6c; --red-soft:#3d1f1b; --green:#8fcf95; --green-soft:#1c2f1e; --gold:#e0b45a;
+  --metal:#b9b9b9;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"PingFang SC","Noto Sans SC","Hiragino Sans GB",sans-serif;line-height:1.5}
+.wrap{max-width:960px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
+header h1{font-size:20px;margin:0;color:var(--red);letter-spacing:2px}
+.nav{display:flex;gap:6px;align-items:center}
+button,input[type=date]{font:inherit;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer}
+button:hover{border-color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;position:relative}
+.card h2{font-size:14px;margin:0 0 10px;color:var(--muted);font-weight:600;letter-spacing:1px}
+.span2{grid-column:1/-1}
+.hero{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.bigday{font-size:64px;font-weight:700;color:var(--red);line-height:1;min-width:90px;text-align:center}
+.bigday small{display:block;font-size:13px;color:var(--muted);font-weight:400;margin-top:4px}
+.hero .info{flex:1;min-width:200px}
+.lunar{font-size:22px;font-weight:600}
+.gz{font-size:16px;margin-top:4px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted)}
+.tag.red{color:var(--red);border-color:var(--red)}
+.tag.green{color:var(--green);border-color:var(--green)}
+.yiji{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.yj{border-radius:10px;padding:10px}
+.yj.yi{background:var(--green-soft)} .yj.ji{background:var(--red-soft)}
+.yj b{display:inline-block;font-size:20px;width:30px;height:30px;line-height:30px;text-align:center;border-radius:50%;color:#fff;margin-bottom:6px}
+.yj.yi b{background:var(--green)} .yj.ji b{background:var(--red)}
+.yj div{font-size:14px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:14px}
+dt{color:var(--muted)} dd{margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-size:13px;padding:1px 8px;border-radius:6px}
+.chip.good{background:var(--green-soft);color:var(--green)}
+.chip.bad{background:var(--red-soft);color:var(--red)}
+.compass{display:flex;justify-content:center}
+.legend{font-size:12px;color:var(--muted);text-align:center;margin-top:4px}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:28px 1fr 34px;gap:8px;align-items:center;font-size:14px}
+.bar .track{height:14px;background:var(--line);border-radius:7px;overflow:hidden}
+.bar .fill{height:100%;border-radius:7px}
+.bar .st{font-weight:700;text-align:right}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.tablewrap{overflow-x:auto}
+th:not(:nth-child(5)):not(:nth-child(6)),td:not(:nth-child(5)):not(:nth-child(6)){white-space:nowrap}
+td.good{color:var(--green);font-weight:700} td.bad{color:var(--red);font-weight:700}
+tr.now{background:color-mix(in srgb,var(--gold) 14%,transparent)}
+.chk{position:absolute;top:10px;right:10px;font-size:12px;padding:2px 8px;border-radius:999px}
+.chk.ok{background:var(--green);color:#fff;border-color:var(--green)}
+.chk.bad{background:var(--red);color:#fff;border-color:var(--red)}
+.song{font-size:13px;color:var(--muted)}
+.me-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.me-form label{display:flex;gap:4px;align-items:center;color:var(--muted)}
+.me-form input,.me-form select{font:inherit;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+.me-form .primary{background:var(--red);color:#fff;border-color:var(--red)}
+.pillars{width:100%;border-collapse:collapse;text-align:center;font-size:14px}
+.pillars td,.pillars th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:center}
+.pillars .big{font-size:26px;font-weight:700}
+.pillars .ss{font-size:12px;color:var(--muted)}
+.pillars .daycol{background:color-mix(in srgb,var(--gold) 12%,transparent)}
+.mecols{display:grid;grid-template-columns:minmax(260px,1.2fr) 1fr;gap:16px}
+@media (max-width:640px){.mecols{grid-template-columns:1fr}}
+.headline{font-size:22px;font-weight:700}
+.headline em{font-style:normal;color:var(--red)}
+.stars{color:var(--gold);font-size:18px;letter-spacing:2px}
+.summary{background:color-mix(in srgb,var(--gold) 10%,transparent);border-left:3px solid var(--gold);padding:10px 12px;border-radius:6px;margin:10px 0;font-size:15px}
+.shalist{margin:6px 0 0;padding-left:18px;font-size:13px;color:var(--muted)}
+.dayun{display:flex;flex-wrap:wrap;gap:4px;font-size:12px}
+.dayun span{border:1px solid var(--line);border-radius:6px;padding:2px 6px;text-align:center}
+.dayun span.cur{border-color:var(--red);color:var(--red);font-weight:700}
+.htag{display:inline-block;font-size:12px;padding:0 6px;border-radius:5px;margin:1px}
+footer{margin-top:16px;font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center}
+@media (max-width:520px){ .bigday{font-size:48px} .yiji{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>每日通胜</h1>
+    <div class="nav">
+      <button id="prev">‹ 前一日</button>
+      <input type="date" id="date">
+      <button id="next">后一日 ›</button>
+      <button id="today">今日</button>
+      <button id="cmp" title="开启后每张卡片可标记 对/错，用来对比实体通胜">对比模式</button>
+    </div>
+  </header>
+  <section class="card" style="margin-bottom:12px">
+    <form class="me-form" id="meForm">
+      <b style="color:var(--red)">我的生辰</b>
+      <label>出生日期 <input type="date" id="meDate" required></label>
+      <label>时间 <input type="time" id="meTime"></label>
+      <label><input type="checkbox" id="meNoTime"> 不知道时辰</label>
+      <label>性别 <select id="meGender"><option value="">（不填）</option><option value="m">男</option><option value="f">女</option></select></label>
+      <button class="primary" type="submit">看本命</button>
+      <button type="button" id="meClear">清除</button>
+    </form>
+  </section>
+  <main id="app" class="grid"></main>
+  <footer>
+    <span>依《协纪辨方书》规则计算（lunar-javascript）。当旺五行为本页按节气推算。所有计算都在你自己的浏览器完成，生辰只存在本机，不会上传。</span>
+    <span><button id="export">导出对比记录 CSV</button> <button id="clear">清除记录</button></span>
+  </footer>
+</div>
+<script>
+const WX = ['木','火','土','金','水'];
+const WX_COLOR = {木:'var(--wood)',火:'var(--fire)',土:'var(--earth)',金:'var(--metal)',水:'var(--water)'};
+const SI_LI = {'立春':'木','立夏':'火','立秋':'金','立冬':'水'};
+const DIRS = ['正北','东北','正东','东南','正南','西南','正西','西北']; // clockwise from N
+const DIR_ALIAS = {'北':'正北','东':'正东','南':'正南','西':'正西'};
+const WEEK = ['日','一','二','三','四','五','六'];
+
+let cur = new Date(); cur.setHours(12,0,0,0);
+let cmpMode = false;
+const store = {
+  get(){ try{ return JSON.parse(localStorage.getItem('ts-check')||'{}'); }catch(e){ return {}; } },
+  set(v){ try{ localStorage.setItem('ts-check', JSON.stringify(v)); }catch(e){} }
+};
+
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const toDate = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d,12); };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// 当旺五行：四立定季节，四立前18日为土旺用事
+function wangXiang(date){
+  const pts = [];
+  for (const off of [-200, 0, 200]) {
+    const d = new Date(date); d.setDate(d.getDate()+off);
+    const tbl = Solar.fromDate(d).getLunar().getJieQiTable();
+    for (const [k,v] of Object.entries(tbl)) if (SI_LI[k]) pts.push({name:k, ymd:v.toYmd()});
+  }
+  const uniq = [...new Map(pts.map(p => [p.ymd,p])).values()].sort((a,b)=>a.ymd<b.ymd?-1:1);
+  const today = ymd(date);
+  const prev = uniq.filter(p => p.ymd <= today).pop();
+  const next = uniq.find(p => p.ymd > today);
+  const daysToNext = Math.round((toDate(next.ymd) - toDate(today)) / 864e5);
+  const tuWang = daysToNext <= 18;
+  const wang = tuWang ? '土' : SI_LI[prev.name];
+  const i = WX.indexOf(wang);
+  const state = {};
+  state[WX[i]] = '旺'; state[WX[(i+1)%5]] = '相'; state[WX[(i+4)%5]] = '休';
+  state[WX[(i+3)%5]] = '囚'; state[WX[(i+2)%5]] = '死';
+  return {wang, state, tuWang, prev, next, daysToNext};
+}
+
+function chkBtn(key){
+  if (!cmpMode) return '';
+  const v = store.get()[ymd(cur)+'|'+key];
+  const cls = v==='ok'?'ok':v==='bad'?'bad':'';
+  const label = v==='ok'?'✓ 一致':v==='bad'?'✗ 不同':'对比？';
+  return `<button class="chk ${cls}" data-key="${esc(key)}">${label}</button>`;
+}
+
+function compassSVG(gods){
+  const R = 120, C = 140, S = 280;
+  let s = `<svg viewBox="0 0 ${S} ${S}" width="100%" style="max-width:300px" role="img" aria-label="方位图">`;
+  s += `<circle cx="${C}" cy="${C}" r="${R}" fill="none" stroke="var(--line)" stroke-width="2"/>`;
+  s += `<circle cx="${C}" cy="${C}" r="38" fill="none" stroke="var(--line)"/>`;
+  DIRS.forEach((d,k) => {
+    const a = (k*45 - 90) * Math.PI/180, a2 = ((k*45+22.5) - 90) * Math.PI/180;
+    s += `<line x1="${C+38*Math.cos(a2)}" y1="${C+38*Math.sin(a2)}" x2="${C+R*Math.cos(a2)}" y2="${C+R*Math.sin(a2)}" stroke="var(--line)"/>`;
+    const lx = C + (R+0)*Math.cos(a)*0.86, ly = C + (R+0)*Math.sin(a)*0.86;
+    s += `<text x="${lx}" y="${ly+4}" text-anchor="middle" font-size="12" fill="var(--muted)">${d}</text>`;
+    const here = gods.filter(g => g.dir === d);
+    here.forEach((g,j) => {
+      const r = 62 + j*0; const off = (j - (here.length-1)/2) * 15;
+      const gx = C + r*Math.cos(a) , gy = C + r*Math.sin(a) + off;
+      s += `<text x="${gx}" y="${gy+4}" text-anchor="middle" font-size="12" font-weight="700" fill="${g.color}">${g.name}</text>`;
+    });
+  });
+  s += `<text x="${C}" y="${C+5}" text-anchor="middle" font-size="14" fill="var(--ink)">中</text></svg>`;
+  return s;
+}
+
+function render(){
+  const solar = Solar.fromDate(cur), l = solar.getLunar();
+  document.getElementById('date').value = ymd(cur);
+  const jq = l.getJieQi();
+  const fest = [...solar.getFestivals(), ...l.getFestivals(), ...l.getOtherFestivals()];
+  const luck = l.getDayTianShenLuck();
+  const wx = wangXiang(cur);
+  const me = profile ? P.build(profile) : null;
+  const ns = l.getDayNineStar();
+  const isToday = ymd(cur) === ymd(new Date());
+  const nowH = new Date().getHours();
+
+  const gods = [
+    {name:'喜神', dir:l.getDayPositionXiDesc(), color:'var(--red)'},
+    {name:'福神', dir:l.getDayPositionFuDesc(), color:'var(--gold)'},
+    {name:'财神', dir:l.getDayPositionCaiDesc(), color:'var(--green)'},
+    {name:'阳贵', dir:l.getDayPositionYangGuiDesc(), color:'var(--water)'},
+    {name:'阴贵', dir:l.getDayPositionYinGuiDesc(), color:'var(--water)'},
+    {name:'煞', dir:DIR_ALIAS[l.getDaySha()]||l.getDaySha(), color:'var(--ink)'},
+  ];
+
+  const times = l.getTimes().slice(0,12);
+  const timeRows = times.map((t,k) => {
+    const lo = k===0 ? 23 : 2*k-1, hi = k===0 ? 0 : 2*k;
+    const now = isToday && (k===0 ? (nowH===23||nowH===0) : (nowH===lo||nowH===hi));
+    const g = t.getTianShenLuck()==='吉';
+    return `<tr class="${now?'now':''}">
+      <td><b>${t.getZhi()}时</b><br><span class="song">${String(lo).padStart(2,'0')}–${String(hi+1).padStart(2,'0')}</span></td>
+      <td>${t.getGanZhi()}</td>
+      <td class="${g?'good':'bad'}">${t.getTianShen()}<br>${t.getTianShenLuck()}</td>
+      <td>冲${t.getChongDesc()}<br>煞${t.getSha()}</td>
+      <td>${t.getYi().join(' ')}</td>
+      <td>${t.getJi().join(' ')}</td>
+      <td>财${t.getPositionCaiDesc()}<br>喜${t.getPositionXiDesc()}</td>
+      ${me ? `<td>${P.hourTags(me,t).map(([x,b])=>`<span class="htag chip ${b?'bad':'good'}">${x}</span>`).join('')||'—'}</td>` : ''}
+    </tr>`;
+  }).join('');
+
+  const bars = WX.map(w => {
+    const st = wx.state[w], pct = {旺:100,相:80,休:55,囚:35,死:15}[st];
+    return `<div class="bar"><span style="color:${WX_COLOR[w]};font-weight:700">${w}</span>
+      <div class="track"><div class="fill" style="width:${pct}%;background:${WX_COLOR[w]}"></div></div>
+      <span class="st" style="color:${WX_COLOR[w]}">${st}</span></div>`;
+  }).join('');
+
+  document.getElementById('app').innerHTML = `
+  <section class="card span2">${chkBtn('基本')}
+    <div class="hero">
+      <div class="bigday">${solar.getDay()}<small>${solar.getYear()}年${solar.getMonth()}月 · 星期${WEEK[cur.getDay()]}</small></div>
+      <div class="info">
+        <div class="lunar">农历${l.getMonthInChinese()}月${l.getDayInChinese()}</div>
+        <div class="gz">${l.getYearInGanZhi()}年【${l.getYearShengXiao()}】 ${l.getMonthInGanZhi()}月 ${l.getDayInGanZhi()}日</div>
+        <div class="tags">
+          <span class="tag ${luck==='吉'?'green':'red'}">${l.getDayTianShen()} · ${l.getDayTianShenType()}日</span>
+          <span class="tag">建除：${l.getZhiXing()}日</span>
+          <span class="tag">${l.getXiu()}${l.getZheng()}${l.getAnimal()}（${l.getXiuLuck()}）</span>
+          ${jq?`<span class="tag red">今日${jq}</span>`:''}
+          ${fest.map(f=>`<span class="tag red">${esc(f)}</span>`).join('')}
+          <span class="tag">月相：${l.getYueXiang()}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  ${me ? natalCard(me) + todayCard(me, l, wx) : ''}
+
+  <section class="card span2">${chkBtn('宜忌')}
+    <h2>宜 忌</h2>
+    <div class="yiji">
+      <div class="yj yi"><b>宜</b><div>${l.getDayYi().join('　')}</div></div>
+      <div class="yj ji"><b>忌</b><div>${l.getDayJi().join('　')}</div></div>
+    </div>
+  </section>
+
+  <section class="card">${chkBtn('神煞')}
+    <h2>神 煞</h2>
+    <dl>
+      <dt>吉神宜趋</dt><dd class="chips">${l.getDayJiShen().map(x=>`<span class="chip good">${x}</span>`).join('')}</dd>
+      <dt>凶煞宜忌</dt><dd class="chips">${l.getDayXiongSha().map(x=>`<span class="chip bad">${x}</span>`).join('')}</dd>
+      <dt>冲煞</dt><dd>冲${l.getDayChongDesc()} 煞${l.getDaySha()}</dd>
+      <dt>彭祖百忌</dt><dd>${l.getPengZuGan()}<br>${l.getPengZuZhi()}</dd>
+      <dt>胎神占方</dt><dd>${l.getDayPositionTai()}</dd>
+      <dt>日禄</dt><dd>${l.getDayLu()}</dd>
+      <dt>旬空</dt><dd>${l.getDayXun()}旬 · 空${l.getDayXunKong()}</dd>
+    </dl>
+  </section>
+
+  <section class="card">${chkBtn('方位')}
+    <h2>方 位（上北下南）</h2>
+    <div class="compass">${compassSVG(gods)}</div>
+    <div class="legend">喜神${gods[0].dir} · 福神${gods[1].dir} · 财神${gods[2].dir} · 阳贵${gods[3].dir} · 阴贵${gods[4].dir} · 煞${gods[5].dir} · 太岁${l.getDayPositionTaiSuiDesc()}</div>
+  </section>
+
+  <section class="card">${chkBtn('五行')}
+    <h2>当旺五行</h2>
+    <div class="bars">${bars}</div>
+    <div class="note">${wx.tuWang ? `土旺用事（距${wx.next.name} ${wx.daysToNext} 日）` : `${wx.prev.name}后，${wx.wang}当令`}；下一个四立：${wx.next.name} ${wx.next.ymd}</div>
+    <dl style="margin-top:10px">
+      <dt>纳音</dt><dd>年${l.getYearNaYin()} · 月${l.getMonthNaYin()} · 日${l.getDayNaYin()}</dd>
+      <dt>日柱五行</dt><dd>${l.getDayGan()}${l.getDayZhi()}（${l.getEightChar().getDayWuXing().split('').join('')}）</dd>
+    </dl>
+  </section>
+
+  <section class="card">${chkBtn('九星')}
+    <h2>九星 · 星宿</h2>
+    <dl>
+      <dt>日九星</dt><dd>${ns.toFullString()}</dd>
+      <dt>${l.getXiu()}宿</dt><dd class="song">${l.getXiuSong()}</dd>
+    </dl>
+  </section>
+
+  <section class="card span2">${chkBtn('时辰')}
+    <h2>时辰吉凶</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>时辰</th><th>干支</th><th>天神</th><th>冲煞</th><th>宜</th><th>忌</th><th>方位</th>${me?'<th>与你</th>':''}</tr></thead>
+      <tbody>${timeRows}</tbody>
+    </table></div>
+  </section>`;
+}
+
+function shift(n){ cur.setDate(cur.getDate()+n); render(); }
+document.getElementById('prev').onclick = () => shift(-1);
+document.getElementById('next').onclick = () => shift(1);
+document.getElementById('today').onclick = () => { cur = new Date(); cur.setHours(12,0,0,0); render(); };
+document.getElementById('date').onchange = e => { if (e.target.value) { cur = toDate(e.target.value); render(); } };
+document.getElementById('cmp').onclick = e => { cmpMode = !cmpMode; e.target.style.borderColor = cmpMode ? 'var(--red)' : ''; render(); };
+document.getElementById('app').addEventListener('click', e => {
+  const b = e.target.closest('.chk'); if (!b) return;
+  const all = store.get(), k = ymd(cur)+'|'+b.dataset.key;
+  all[k] = all[k]===undefined ? 'ok' : all[k]==='ok' ? 'bad' : undefined;
+  if (all[k]===undefined) delete all[k];
+  store.set(all); render();
+});
+document.getElementById('export').onclick = () => {
+  const rows = [['日期','栏目','结果'], ...Object.entries(store.get()).map(([k,v]) => [...k.split('|'), v==='ok'?'一致':'不同'])];
+  const blob = new Blob(['﻿'+rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '通胜对比.csv'; a.click();
+};
+document.getElementById('clear').onclick = () => { if (confirm('清除所有对比记录？')) { store.set({}); render(); } };
+document.addEventListener('keydown', e => { if (e.target.tagName==='INPUT') return; if (e.key==='ArrowLeft') shift(-1); if (e.key==='ArrowRight') shift(1); });
+// ---------- 本命 ----------
+let profile = null;
+try { profile = JSON.parse(localStorage.getItem('ts-me') || 'null'); } catch(e) {}
+const wxc = i => WX_COLOR[P.WX[i]];
+const ganC = g => `<span style="color:${wxc(P.GAN_WX[P.gi(g)])}">${g}</span>`;
+const zhiC = z => `<span style="color:${wxc(P.ZHI_WX[P.zi(z)])}">${z}</span>`;
+
+function natalCard(n){
+  const cols = ['年柱','月柱','日柱','时柱'];
+  const cell = (k, f) => n.pillars[k] ? f(k) : '<span class="ss">未知</span>';
+  const row = (name, f) => `<tr><th class="ss">${name}</th>${cols.map((_,k)=>`<td class="${k===2?'daycol':''}">${cell(k,f)}</td>`).join('')}</tr>`;
+  const st = n.st, maxC = Math.max(...n.count);
+  const que = P.WX.filter((_,i)=>n.count[i]===0);
+  const curY = new Date().getFullYear();
+  return `<section class="card span2">${chkBtn('本命')}
+    <h2>我的本命 · ${n.solar.toYmd()}${n.hasTime?' '+n.p.time:'（时辰未知）'} · 农历${n.lunar.getYearInGanZhi()}年${n.lunar.getMonthInChinese()}月${n.lunar.getDayInChinese()} · 属${n.lunar.getYearShengXiaoByLiChun()}</h2>
+    <div class="mecols"><div>
+      <table class="pillars">
+        <tr><th></th>${cols.map(c=>`<th class="ss">${c}</th>`).join('')}</tr>
+        ${row('十神', k => k===2 ? '<b>日主</b>' : P.shiShen(n.dayGan, n.gan[k]))}
+        ${row('天干', k => `<span class="big">${ganC(n.gan[k])}</span>`)}
+        ${row('地支', k => `<span class="big">${zhiC(n.zhi[k])}</span>`)}
+        ${row('藏干', k => n.hide[k].map(g=>`${ganC(g)}<span class="ss">${P.shiShen(n.dayGan,g)}</span>`).join('<br>'))}
+        ${row('纳音', k => `<span class="ss">${n.nayin[k]}</span>`)}
+        ${row('地势', k => `<span class="ss">${n.dishi[k]}</span>`)}
+      </table>
+    </div><div>
+      <dl>
+        <dt>日主</dt><dd><b>${ganC(n.dayGan)}${P.WX[n.me]}</b>（${n.st.label}，扶助占 ${Math.round(st.ratio*100)}%）</dd>
+        <dt>喜用（近似）</dt><dd>${st.xi.map(i=>`<b style="color:${wxc(i)}">${P.WX[i]}</b>`).join(' ')}</dd>
+        <dt>忌</dt><dd>${st.ji.map(i=>`<b style="color:${wxc(i)}">${P.WX[i]}</b>`).join(' ')}</dd>
+      </dl>
+      ${st.special?'<div class="note" style="color:var(--red)">⚠ 五行极端，可能是从格等特殊格局，喜用需人工判断。</div>':''}
+      <div class="bars" style="margin-top:10px">${P.WX.map((w,i)=>`<div class="bar"><span style="color:${wxc(i)};font-weight:700">${w}</span><div class="track"><div class="fill" style="width:${maxC?n.count[i]/maxC*100:0}%;background:${wxc(i)}"></div></div><span class="st">${n.count[i]}</span></div>`).join('')}</div>
+      <div class="note">五行个数（天干＋地支本气）${que.length?' · 缺'+que.join(''):''}</div>
+      <dl style="margin-top:8px"><dt>命带神煞</dt><dd class="chips">${Object.entries(n.natalSha).map(([s,w])=>`<span class="chip ${['劫煞','亡神','羊刃'].includes(s)?'bad':'good'}" title="${P.SHA_DESC[s]||''}">${s}<small>（${w.join('')}）</small></span>`).join('')||'—'}</dd>
+      <dt>日空亡</dt><dd>${n.xunKong}</dd></dl>
+    </div></div>
+    ${n.dayun ? `<div style="margin-top:10px"><div class="ss" style="margin-bottom:4px">大运（${n.yunStart}）</div><div class="dayun">${n.dayun.map(d=>`<span class="${d.getStartYear()<=curY&&curY<=d.getEndYear()?'cur':''}">${d.getGanZhi()}<br>${d.getStartYear()}<br>${P.shiShen(n.dayGan,d.getGanZhi()[0])}</span>`).join('')}</div></div>` : '<div class="note">填性别可显示大运。</div>'}
+    <div class="note">喜用为程序按「月令加倍、藏干加权」估算的近似值，正式论命请以命理师核定为准。时间按出生地钟表时间，未做真太阳时校正。</div>
+  </section>`;
+}
+
+function todayCard(n, l, wx){
+  const t = P.today(n, l, wx.wang);
+  const good = t.sha.filter(s => !['羊刃','劫煞','亡神','空亡'].includes(s));
+  const badR = t.rels.filter(r => r.bad), goodR = t.rels.filter(r => !r.bad);
+  const wxTxt = t.wxScore > 0 ? '今日干支五行是你的喜用，做事较顺' : t.wxScore < 0 ? '今日干支五行属你的忌神，凡事多留余地' : '今日五行对你喜忌参半';
+  const best = l.getTimes().slice(0,12).filter(h => { const tg = P.hourTags(n,h); return tg.some(x=>!x[1]) && !tg.some(x=>x[1]); }).map(h=>h.getZhi()+'时');
+  const parts = [`今天是你的<b>${t.ss}日</b>`];
+  if (good.length) parts.push(`${good.join('、')}到位`);
+  parts.push(wxTxt);
+  if (badR.length) parts.push(`留意：今日${badR.map(r=>r.t+'你的'+r.where.replace(/（.*）/,'')).join('，')}`);
+  if (best.length) parts.push(`较好的时辰：${best.join('、')}`);
+  const stars = '★'.repeat(t.stars) + '☆'.repeat(5-t.stars);
+  return `<section class="card span2">${chkBtn('个人今日')}
+    <h2>今日对你</h2>
+    <div class="headline">${t.gz}日 · 你的<em>${t.ss}日</em> <span class="stars" title="综合参考分">${stars}</span></div>
+    <div class="song">${P.SS_DESC[t.ss]}　（地支${t.dz}对你为${t.ssZ}）</div>
+    <div class="summary">${parts.join('；')}。</div>
+    <div class="mecols"><dl>
+      <dt>与本命</dt><dd class="chips">${t.rels.map(r=>`<span class="chip ${r.bad?'bad':'good'}" title="${r.where}">${r.t}·${r.where.replace(/（.*）/,'')}</span>`).join('')||'无明显冲合'}</dd>
+      <dt>引动神煞</dt><dd>${t.sha.length?`<div class="chips">${t.sha.map(s=>`<span class="chip ${['羊刃','劫煞','亡神','空亡'].includes(s)?'bad':'good'}">${s}</span>`).join('')}</div><ul class="shalist">${t.sha.map(s=>`<li>${P.SHA_DESC[s]}</li>`).join('')}</ul>`:'无'}</dd>
+    </dl><dl>
+      <dt>今日五行</dt><dd>${ganC(t.dg)}${zhiC(t.dz)}（${t.dayWx.map(i=>P.WX[i]).join('')}）→ ${t.wxScore>0?'<b style="color:var(--green)">喜</b>':t.wxScore<0?'<b style="color:var(--red)">忌</b>':'平'}</dd>
+      <dt>当旺五行</dt><dd>${wx.wang}旺 → ${t.wangGood?'<b style="color:var(--green)">对你有利</b>':'<b style="color:var(--red)">对你不利</b>'}</dd>
+      <dt>流年</dt><dd>${t.ly}（${t.lySS}）${t.ty.length?` · <b style="color:var(--red)">${t.ty.join('、')}</b>`:''}</dd>
+      ${t.dy?`<dt>大运</dt><dd>${t.dy.getGanZhi()}（${P.shiShen(n.dayGan,t.dy.getGanZhi()[0])}运，${t.dy.getStartYear()}–${t.dy.getEndYear()}）</dd>`:''}
+    </dl></div>
+    <div class="note">星级为规则加总的参考分，不是定论。</div>
+  </section>`;
+}
+
+const qs = new URLSearchParams(location.search);
+if (qs.get('birth')) profile = { date: qs.get('birth'), time: qs.get('time') || '', gender: qs.get('g') || '' };
+
+function fillForm(){
+  if (!profile) return;
+  document.getElementById('meDate').value = profile.date;
+  document.getElementById('meTime').value = profile.time || '';
+  document.getElementById('meNoTime').checked = !profile.time;
+  document.getElementById('meGender').value = profile.gender || '';
+}
+document.getElementById('meForm').onsubmit = e => {
+  e.preventDefault();
+  const noTime = document.getElementById('meNoTime').checked;
+  profile = { date: document.getElementById('meDate').value,
+              time: noTime ? '' : (document.getElementById('meTime').value || ''),
+              gender: document.getElementById('meGender').value };
+  try { localStorage.setItem('ts-me', JSON.stringify(profile)); } catch(e) {}
+  render();
+};
+document.getElementById('meClear').onclick = () => { profile = null; try { localStorage.removeItem('ts-me'); } catch(e) {} document.getElementById('meForm').reset(); render(); };
+fillForm();
+render();
+</script>
+</body>
+</html>
