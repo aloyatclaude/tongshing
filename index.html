@@ -68,8 +68,25 @@ button,input,select{font:inherit;color:inherit}
 .datepick{display:inline-flex;align-items:center;gap:8px;font-family:var(--serif);font-size:17px;font-weight:600;padding:5px 12px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer}
 .datepick:hover,.datepick:focus-visible{background:var(--surface);border-color:var(--line-2)}
 .datepick svg{flex:none;color:var(--muted)}
-.datewrap input{position:absolute;left:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
-.datewrap input.visible{position:static;width:auto;height:36px;opacity:1;pointer-events:auto;border:1px solid var(--line-2);border-radius:8px;padding:0 10px;background:var(--surface)}
+.cal{position:absolute;top:calc(100% + 8px);left:0;z-index:30;width:332px;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.14);padding:14px}
+.cal-h{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px}
+.cal-h .sel{display:flex;gap:6px}
+.cal-h select{height:34px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);padding:0 8px;font-family:var(--serif);font-size:15px;font-weight:600}
+.cal-h .iconbtn{width:34px;height:34px}
+.cal-w,.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-w span{text-align:center;font-size:12px;color:var(--muted);padding:4px 0}
+.cal-w span:first-child,.cal-w span:last-child{color:var(--accent)}
+.cal-g button{border:0;background:transparent;border-radius:8px;padding:5px 0 4px;cursor:pointer;line-height:1.2;min-height:44px}
+.cal-g button b{display:block;font-family:var(--serif);font-size:16px;font-weight:600}
+.cal-g button small{display:block;font-size:10.5px;color:var(--muted);margin-top:2px;white-space:nowrap}
+.cal-g button small.jq{color:var(--accent)}
+.cal-g button:hover{background:var(--surface-2)}
+.cal-g button.today{box-shadow:inset 0 0 0 1px var(--accent)}
+.cal-g button.sel{background:var(--accent);color:#fff}
+.cal-g button.sel small{color:rgba(255,255,255,.85)}
+.cal-f{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.cal-back{position:fixed;inset:0;z-index:29;background:rgba(0,0,0,.28)}
+@media (min-width:641px){.cal-back{background:transparent}}
 .btn{border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.ghost{background:transparent}
@@ -167,11 +184,13 @@ button,input,select{font:inherit;color:inherit}
 .hour .mine{grid-column:3/-1;display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)}
 
 /* ---------- natal ---------- */
-.form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:14px;align-items:end}
+.form{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1.5fr) minmax(0,.9fr) auto;gap:14px;align-items:end}
+.selrow{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px}
+.selrow.two{grid-template-columns:1.6fr 1fr}
+.formerr{color:var(--bad);font-size:13px;margin-top:10px}
 .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px}
 .field input,.field select{width:100%;height:40px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);padding:0 12px}
 .field input:focus,.field select:focus{outline:2px solid color-mix(in srgb,var(--accent) 35%,transparent);border-color:var(--accent)}
-.check{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink-2);height:40px}
 .form .actions{display:flex;gap:8px}
 .form .actions .btn{height:40px}
 .pillars{width:100%;border-collapse:collapse;text-align:center}
@@ -211,6 +230,8 @@ footer .btn{font-size:12.5px;padding:4px 12px}
   .dayun{grid-template-columns:repeat(5,minmax(0,1fr))}
 }
 @media (max-width:640px){
+  .form{grid-template-columns:minmax(0,1fr)}
+  .cal{position:fixed;left:50%;top:76px;transform:translateX(-50%);width:min(360px,calc(100vw - 24px))}
   .wrap{padding:0 16px}
   .topbar .wrap{height:54px}
   .brand{font-size:17px} .seal{width:26px;height:26px;font-size:13px}
@@ -245,8 +266,9 @@ footer .btn{font-size:12.5px;padding:4px 12px}
     <div class="nav">
       <button class="iconbtn" id="prev" aria-label="前一日">‹</button>
       <div class="datewrap">
-        <button type="button" class="datepick" id="datePick" title="选择日期"><span id="dateLabel"></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
-        <input type="date" id="date" aria-label="选择日期" tabindex="-1">
+        <button type="button" class="datepick" id="datePick" title="选择日期" aria-haspopup="dialog" aria-expanded="false"><span id="dateLabel"></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
+        <div class="cal-back" id="calBack" hidden></div>
+        <div class="cal" id="cal" hidden role="dialog" aria-label="选择日期"></div>
       </div>
       <button class="iconbtn" id="next" aria-label="后一日">›</button>
     </div>
@@ -259,13 +281,13 @@ footer .btn{font-size:12.5px;padding:4px 12px}
     <section class="card">
       <div class="sec-h"><h3>输入生辰</h3><span class="sub">只保存在你自己的设备上</span></div>
       <form class="form" id="meForm">
-        <div class="field"><label for="meDate">出生日期（公历）</label><input type="date" id="meDate" required></div>
-        <div class="field"><label for="meTime">出生时间</label><input type="time" id="meTime"></div>
+        <div class="field"><label for="meY">出生日期（公历）</label><div class="selrow"><select id="meY" aria-label="年"></select><select id="meM" aria-label="月"></select><select id="meD" aria-label="日"></select></div></div>
+        <div class="field"><label for="meH">出生时间</label><div class="selrow two"><select id="meH" aria-label="时"></select><select id="meMin" aria-label="分"></select></div></div>
         <div class="field"><label for="meGender">性别（用于大运）</label>
           <select id="meGender"><option value="">不填</option><option value="m">男</option><option value="f">女</option></select></div>
-        <label class="check"><input type="checkbox" id="meNoTime"> 不知道出生时辰</label>
         <div class="actions"><button class="btn primary" type="submit">排盘</button><button class="btn" type="button" id="meClear">清除</button></div>
       </form>
+      <div class="formerr" id="meErr" hidden></div>
     </section>
     <div id="natal" class="stack"></div>
   </main>
@@ -578,7 +600,6 @@ function renderMe(){
 
 function render(){
   $('dateLabel').textContent = `${cur.getFullYear()}年${cur.getMonth()+1}月${cur.getDate()}日 · 星期${WEEK[cur.getDay()]}`;
-  $('date').value = ymd(cur);
   $('viewToday').hidden = tab !== 'today';
   $('datebar').hidden = tab !== 'today';
   $('viewMe').hidden = tab !== 'me';
@@ -593,13 +614,52 @@ document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setTab(
 $('prev').onclick = () => shift(-1);
 $('next').onclick = () => shift(1);
 $('today').onclick = () => { cur = new Date(); cur.setHours(12,0,0,0); render(); };
-$('date').onchange = e => { if (e.target.value) { cur = toDate(e.target.value); render(); } };
-$('datePick').onclick = () => {
-  const i = $('date');
-  if (typeof i.showPicker === 'function') { try { i.showPicker(); return; } catch (e) {} }
-  // 不支持 showPicker 的浏览器：直接露出日期输入框
-  i.classList.add('visible'); i.tabIndex = 0; $('datePick').hidden = true; i.focus();
-};
+// ---------- 自制日历（不依赖浏览器原生日期选择器，微信/WhatsApp 内置浏览器也能用） ----------
+let calY, calM;
+function calLabel(d){
+  const l = Solar.fromYmd(d.getFullYear(), d.getMonth()+1, d.getDate()).getLunar();
+  const jq = l.getJieQi();
+  if (jq) return `<small class="jq">${jq}</small>`;
+  if (l.getDay() === 1) return `<small class="jq">${l.getMonthInChinese()}月</small>`;
+  return `<small>${l.getDayInChinese()}</small>`;
+}
+function renderCal(){
+  const first = new Date(calY, calM, 1, 12), days = new Date(calY, calM+1, 0).getDate();
+  const todayS = ymd(new Date()), selS = ymd(cur);
+  let years = ''; for (let y = 1900; y <= 2100; y++) years += `<option value="${y}" ${y===calY?'selected':''}>${y}年</option>`;
+  let months = ''; for (let m = 0; m < 12; m++) months += `<option value="${m}" ${m===calM?'selected':''}>${m+1}月</option>`;
+  let cells = '<span></span>'.repeat(first.getDay());
+  for (let d = 1; d <= days; d++) {
+    const dt = new Date(calY, calM, d, 12), s = ymd(dt);
+    cells += `<button type="button" data-day="${s}" class="${s===selS?'sel':''} ${s===todayS?'today':''}"><b>${d}</b>${calLabel(dt)}</button>`;
+  }
+  $('cal').innerHTML = `
+    <div class="cal-h">
+      <button type="button" class="iconbtn" data-cal="-1" aria-label="上个月">‹</button>
+      <div class="sel"><select id="calY" aria-label="年份">${years}</select><select id="calM" aria-label="月份">${months}</select></div>
+      <button type="button" class="iconbtn" data-cal="1" aria-label="下个月">›</button>
+    </div>
+    <div class="cal-w">${'日一二三四五六'.split('').map(w=>`<span>${w}</span>`).join('')}</div>
+    <div class="cal-g">${cells}</div>
+    <div class="cal-f"><button type="button" class="btn ghost" data-cal="today">今天</button><button type="button" class="btn ghost" data-cal="close">关闭</button></div>`;
+  $('calY').onchange = e => { calY = +e.target.value; renderCal(); };
+  $('calM').onchange = e => { calM = +e.target.value; renderCal(); };
+}
+function openCal(){ calY = cur.getFullYear(); calM = cur.getMonth(); renderCal(); $('cal').hidden = false; $('calBack').hidden = false; $('datePick').setAttribute('aria-expanded','true'); }
+function closeCal(){ $('cal').hidden = true; $('calBack').hidden = true; $('datePick').setAttribute('aria-expanded','false'); }
+$('datePick').onclick = () => { $('cal').hidden ? openCal() : closeCal(); };
+$('calBack').onclick = closeCal;
+$('cal').addEventListener('click', e => {
+  const day = e.target.closest('[data-day]');
+  if (day) { cur = toDate(day.dataset.day); closeCal(); render(); return; }
+  const c = e.target.closest('[data-cal]'); if (!c) return;
+  const v = c.dataset.cal;
+  if (v === 'close') return closeCal();
+  if (v === 'today') { cur = new Date(); cur.setHours(12,0,0,0); closeCal(); render(); return; }
+  calM += +v; if (calM < 0) { calM = 11; calY--; } if (calM > 11) { calM = 0; calY++; }
+  renderCal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('cal').hidden) closeCal(); });
 $('cmp').onclick = e => { cmpMode = !cmpMode; e.target.classList.toggle('on', cmpMode); render(); };
 document.addEventListener('click', e => {
   const g = e.target.closest('[data-goto]'); if (g) { setTab(g.dataset.goto); return; }
@@ -615,28 +675,53 @@ $('export').onclick = () => {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '通胜对比.csv'; a.click();
 };
 $('clear').onclick = () => { if (confirm('清除所有对比记录？')) { store.set({}); render(); } };
-document.addEventListener('keydown', e => { if (tab!=='today' || /INPUT|SELECT/.test(e.target.tagName)) return; if (e.key==='ArrowLeft') shift(-1); if (e.key==='ArrowRight') shift(1); });
+document.addEventListener('keydown', e => { if (tab!=='today' || !$('cal').hidden || /INPUT|SELECT/.test(e.target.tagName)) return; if (e.key==='ArrowLeft') shift(-1); if (e.key==='ArrowRight') shift(1); });
 
 const qs = new URLSearchParams(location.search);
 if (qs.get('birth')) profile = { date: qs.get('birth'), time: qs.get('time') || '', gender: qs.get('g') || '' };
 if (location.hash === '#me') tab = 'me';
 
+// ---------- 生辰下拉选单 ----------
+const pad = n => String(n).padStart(2,'0');
+const opt = (v, t) => `<option value="${v}">${t}</option>`;
+(function initBirthSelects(){
+  const thisY = new Date().getFullYear();
+  let y = opt('', '年'); for (let i = thisY; i >= 1920; i--) y += opt(i, i+'年');
+  let m = opt('', '月'); for (let i = 1; i <= 12; i++) m += opt(i, i+'月');
+  let h = opt('', '不知道时辰'); for (let i = 0; i <= 23; i++) h += opt(i, `${pad(i)}点（${'子丑寅卯辰巳午未申酉戌亥'[Math.floor((i+1)/2)%12]}时）`);
+  let mi = ''; for (let i = 0; i < 60; i++) mi += opt(i, pad(i)+'分');
+  $('meY').innerHTML = y; $('meM').innerHTML = m; $('meH').innerHTML = h; $('meMin').innerHTML = mi;
+  fillDays();
+})();
+function fillDays(){
+  const y = +$('meY').value || 2000, m = +$('meM').value || 1, keep = $('meD').value;
+  const n = new Date(y, m, 0).getDate();
+  let d = opt('', '日'); for (let i = 1; i <= n; i++) d += opt(i, i+'日');
+  $('meD').innerHTML = d;
+  if (keep && +keep <= n) $('meD').value = keep;
+}
+$('meY').onchange = fillDays; $('meM').onchange = fillDays;
+$('meH').onchange = () => { $('meMin').disabled = $('meH').value === ''; };
 function fillForm(){
-  if (!profile) return;
-  $('meDate').value = profile.date;
-  $('meTime').value = profile.time || '';
-  $('meNoTime').checked = !profile.time;
+  if (!profile) { $('meMin').disabled = true; return; }
+  const [y,m,d] = profile.date.split('-').map(Number);
+  $('meY').value = y; $('meM').value = m; fillDays(); $('meD').value = d;
+  if (profile.time) { const [hh,mm] = profile.time.split(':').map(Number); $('meH').value = hh; $('meMin').value = mm; }
+  else { $('meH').value = ''; }
+  $('meMin').disabled = !profile.time;
   $('meGender').value = profile.gender || '';
 }
-$('meNoTime').onchange = e => { $('meTime').disabled = e.target.checked; };
 $('meForm').onsubmit = e => {
   e.preventDefault();
-  const noTime = $('meNoTime').checked;
-  profile = { date: $('meDate').value, time: noTime ? '' : ($('meTime').value || ''), gender: $('meGender').value };
+  const y = $('meY').value, m = $('meM').value, d = $('meD').value;
+  if (!y || !m || !d) { $('meErr').textContent = '请选择完整的出生年、月、日。'; $('meErr').hidden = false; return; }
+  $('meErr').hidden = true;
+  const h = $('meH').value;
+  profile = { date: `${y}-${pad(m)}-${pad(d)}`, time: h === '' ? '' : `${pad(h)}:${pad($('meMin').value)}`, gender: $('meGender').value };
   try { localStorage.setItem('ts-me', JSON.stringify(profile)); } catch(e) {}
   render();
 };
-$('meClear').onclick = () => { profile = null; try { localStorage.removeItem('ts-me'); } catch(e) {} $('meForm').reset(); render(); };
+$('meClear').onclick = () => { profile = null; try { localStorage.removeItem('ts-me'); } catch(e) {} $('meForm').reset(); fillDays(); $('meMin').disabled = true; $('meErr').hidden = true; render(); };
 fillForm();
 render();
 </script>
