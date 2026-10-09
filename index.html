@@ -101,6 +101,10 @@ button,input,select{font:inherit;color:inherit}
 .stamp{flex:none;width:40px;height:40px;border-radius:6px;display:grid;place-items:center;font-family:var(--serif);font-size:21px;font-weight:700;color:#fff}
 .stamp.yi{background:var(--good)} .stamp.ji{background:var(--bad)}
 .words{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:15.5px;line-height:1.8;padding-top:5px}
+.words .strong{color:var(--bad);font-weight:600}
+.yjnote{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.6}
+.alert{margin-top:18px;padding:10px 14px;border-radius:8px;background:var(--bad-soft);color:var(--bad);font-size:14px;line-height:1.7}
+.alert b{font-family:var(--serif);font-weight:700;margin-right:6px}
 
 /* ---------- tags & lists ---------- */
 .tags{display:flex;flex-wrap:wrap;gap:6px}
@@ -351,6 +355,19 @@ function compassSVG(gods){
   return s;
 }
 
+// 宜忌里的特殊用语：「馀事勿取」不是活动；「诸事不宜」表示除宜所列之外都不宜
+const REST = ['馀事勿取','余事勿取'];
+function parseYiJi(yi, ji){
+  const restOnly = yi.some(x => REST.includes(x));
+  const yiItems = yi.filter(x => !REST.includes(x));
+  const allBad = ji.includes('诸事不宜');
+  const hasYi = yiItems.length && !(yiItems.length === 1 && yiItems[0] === '无');
+  let yiNote = '', jiNote = '';
+  if (restOnly) yiNote = '只宜以上几项，其余的事都不要做';
+  if (allBad) jiNote = hasYi ? '除「宜」所列几项之外，其他事情都不宜进行' : '今日诸事不宜，宜静不宜动';
+  return {yiItems, jiItems: ji, restOnly, allBad, yiNote, jiNote};
+}
+
 const hourRange = k => k===0 ? '23:00–00:59' : `${String(2*k-1).padStart(2,'0')}:00–${String(2*k).padStart(2,'0')}:59`;
 
 function renderToday(){
@@ -358,6 +375,8 @@ function renderToday(){
   const jq = l.getJieQi();
   const fest = [...solar.getFestivals(), ...l.getFestivals(), ...l.getOtherFestivals()];
   const luck = l.getDayTianShenLuck();
+  const yj = parseYiJi(l.getDayYi(), l.getDayJi());
+  const yuePo = l.getDayXiongSha().includes('月破');
   const wx = wangXiang(cur);
   const me = profile ? P.build(profile) : null;
   const ns = l.getDayNineStar();
@@ -378,13 +397,14 @@ function renderToday(){
     const now = isToday && (k===0 ? (nowH===23||nowH===0) : (nowH===lo||nowH===hi));
     const g = t.getTianShenLuck()==='吉';
     const sha = P.hourSha(l,t);
+    const hy = parseYiJi(t.getYi(), t.getJi());
     const mine = me ? P.hourTags(me,t) : [];
     return `<div class="hour ${now?'now':''}">
       <div class="t"><b>${t.getZhi()}时${now?' <span class="nowtag">· 现在</span>':''}</b><span>${hourRange(k)}</span><br><span>${t.getGanZhi()}</span></div>
       <div class="luck ${g?'good':'bad'}">${t.getTianShen()}<small>${t.getTianShenType()} · ${t.getTianShenLuck()}</small></div>
       <div><div class="tags">${sha.map(([x,b])=>`<span class="tag ${b?'bad':'good'}">${x}</span>`).join('')||'<span class="muted">—</span>'}</div>
         <div class="muted" style="font-size:12px;margin-top:6px">${t.getNineStar().toString()}</div></div>
-      <div class="yj-line"><div><i class="y">宜</i>${t.getYi().join(' ')}</div><div><i class="j">忌</i>${t.getJi().join(' ')}</div></div>
+      <div class="yj-line"><div><i class="y">宜</i>${hy.yiItems.join(' ')}${hy.restOnly?' <span class="muted">（其余勿取）</span>':''}</div><div><i class="j">忌</i>${hy.allBad?'<b style="color:var(--bad);font-weight:600">诸事不宜</b>':hy.jiItems.join(' ')}</div></div>
       <div class="side"><div>冲<b>${t.getChongDesc()}</b> 煞<b>${t.getSha()}</b></div><div>财神<b>${t.getPositionCaiDesc()}</b> 喜神<b>${t.getPositionXiDesc()}</b></div></div>
       ${me ? `<div class="mine"><span>与你</span><div class="tags">${mine.map(([x,b])=>`<span class="tag ${b?'bad':'gold'}">${x}</span>`).join('')||'<span class="muted">无特别</span>'}</div></div>` : ''}
     </div>`;
@@ -415,9 +435,10 @@ function renderToday(){
       </div>
     </div>
     <div class="yiji">
-      <div class="yj"><span class="stamp yi">宜</span><div class="words">${l.getDayYi().map(x=>`<span>${x}</span>`).join('')}</div></div>
-      <div class="yj"><span class="stamp ji">忌</span><div class="words">${l.getDayJi().map(x=>`<span>${x}</span>`).join('')}</div></div>
+      <div class="yj"><span class="stamp yi">宜</span><div><div class="words">${yj.yiItems.map(x=>`<span>${x}</span>`).join('')}</div>${yj.yiNote?`<div class="yjnote">${yj.yiNote}</div>`:''}</div></div>
+      <div class="yj"><span class="stamp ji">忌</span><div><div class="words">${yj.jiItems.map(x=>`<span class="${x==='诸事不宜'?'strong':''}">${x}</span>`).join('')}</div>${yj.jiNote?`<div class="yjnote">${yj.jiNote}</div>`:''}</div></div>
     </div>
+    ${yuePo ? `<div class="alert"><b>月破日</b>与月令相冲，大事勿用（嫁娶、开市、入宅、签约等都宜避开）；只适合拆卸、清理、祭祀这类事。</div>` : ''}
   </section>
 
   ${me ? todayCard(me, l, wx) : `<section class="card prompt"><p>输入你的生辰，就能看到今天对你是什么日、引动哪些神煞、哪个时辰最好。</p><button class="btn primary" data-goto="me">设置我的命盘</button></section>`}
