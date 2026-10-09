@@ -64,9 +64,12 @@ button,input,select{font:inherit;color:inherit}
 .datebar .nav{display:flex;align-items:center;gap:6px}
 .iconbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;display:grid;place-items:center;font-size:16px;color:var(--ink-2)}
 .iconbtn:hover,.btn:hover{border-color:var(--ink-2)}
-.datepick{position:relative;font-family:var(--serif);font-size:17px;font-weight:600;padding:4px 10px;border-radius:8px;cursor:pointer}
-.datepick:hover{background:var(--surface)}
-.datepick input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.datewrap{position:relative;display:flex;align-items:center;gap:8px}
+.datepick{display:inline-flex;align-items:center;gap:8px;font-family:var(--serif);font-size:17px;font-weight:600;padding:5px 12px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer}
+.datepick:hover,.datepick:focus-visible{background:var(--surface);border-color:var(--line-2)}
+.datepick svg{flex:none;color:var(--muted)}
+.datewrap input{position:absolute;left:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
+.datewrap input.visible{position:static;width:auto;height:36px;opacity:1;pointer-events:auto;border:1px solid var(--line-2);border-radius:8px;padding:0 10px;background:var(--surface)}
 .btn{border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.ghost{background:transparent}
@@ -237,7 +240,10 @@ footer .btn{font-size:12.5px;padding:4px 12px}
   <div class="datebar" id="datebar">
     <div class="nav">
       <button class="iconbtn" id="prev" aria-label="前一日">‹</button>
-      <label class="datepick"><span id="dateLabel"></span><input type="date" id="date" aria-label="选择日期"></label>
+      <div class="datewrap">
+        <button type="button" class="datepick" id="datePick" title="选择日期"><span id="dateLabel"></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
+        <input type="date" id="date" aria-label="选择日期" tabindex="-1">
+      </div>
       <button class="iconbtn" id="next" aria-label="后一日">›</button>
     </div>
     <button class="btn ghost" id="today">回到今天</button>
@@ -567,6 +573,12 @@ $('prev').onclick = () => shift(-1);
 $('next').onclick = () => shift(1);
 $('today').onclick = () => { cur = new Date(); cur.setHours(12,0,0,0); render(); };
 $('date').onchange = e => { if (e.target.value) { cur = toDate(e.target.value); render(); } };
+$('datePick').onclick = () => {
+  const i = $('date');
+  if (typeof i.showPicker === 'function') { try { i.showPicker(); return; } catch (e) {} }
+  // 不支持 showPicker 的浏览器：直接露出日期输入框
+  i.classList.add('visible'); i.tabIndex = 0; $('datePick').hidden = true; i.focus();
+};
 $('cmp').onclick = e => { cmpMode = !cmpMode; e.target.classList.toggle('on', cmpMode); render(); };
 document.addEventListener('click', e => {
   const g = e.target.closest('[data-goto]'); if (g) { setTab(g.dataset.goto); return; }
