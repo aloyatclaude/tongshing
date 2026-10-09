@@ -355,15 +355,15 @@ function compassSVG(gods){
   return s;
 }
 
-// 宜忌里的特殊用语：「馀事勿取」不是活动；「诸事不宜」表示除宜所列之外都不宜
+// 宜忌里的特殊用语：「诸事不宜」表示除宜所列之外都不宜
 const REST = ['馀事勿取','余事勿取'];
 function parseYiJi(yi, ji){
   const restOnly = yi.some(x => REST.includes(x));
-  const yiItems = yi.filter(x => !REST.includes(x));
+  const yiItems = yi;
   const allBad = ji.includes('诸事不宜');
-  const hasYi = yiItems.length && !(yiItems.length === 1 && yiItems[0] === '无');
+  const real = yi.filter(x => !REST.includes(x) && x !== '无');
+  const hasYi = real.length > 0;
   let yiNote = '', jiNote = '';
-  if (restOnly) yiNote = '只宜以上几项，其余的事都不要做';
   if (allBad) jiNote = hasYi ? '除「宜」所列几项之外，其他事情都不宜进行' : '今日诸事不宜，宜静不宜动';
   return {yiItems, jiItems: ji, restOnly, allBad, yiNote, jiNote};
 }
@@ -404,7 +404,7 @@ function renderToday(){
       <div class="luck ${g?'good':'bad'}">${t.getTianShen()}<small>${t.getTianShenType()} · ${t.getTianShenLuck()}</small></div>
       <div><div class="tags">${sha.map(([x,b])=>`<span class="tag ${b?'bad':'good'}">${x}</span>`).join('')||'<span class="muted">—</span>'}</div>
         <div class="muted" style="font-size:12px;margin-top:6px">${t.getNineStar().toString()}</div></div>
-      <div class="yj-line"><div><i class="y">宜</i>${hy.yiItems.join(' ')}${hy.restOnly?' <span class="muted">（其余勿取）</span>':''}</div><div><i class="j">忌</i>${hy.allBad?'<b style="color:var(--bad);font-weight:600">诸事不宜</b>':hy.jiItems.join(' ')}</div></div>
+      <div class="yj-line"><div><i class="y">宜</i>${hy.yiItems.join(' ')}</div><div><i class="j">忌</i>${hy.allBad?'<b style="color:var(--bad);font-weight:600">诸事不宜</b>':hy.jiItems.join(' ')}</div></div>
       <div class="side"><div>冲<b>${t.getChongDesc()}</b> 煞<b>${t.getSha()}</b></div><div>财神<b>${t.getPositionCaiDesc()}</b> 喜神<b>${t.getPositionXiDesc()}</b></div></div>
       ${me ? `<div class="mine"><span>与你</span><div class="tags">${mine.map(([x,b])=>`<span class="tag ${b?'bad':'gold'}">${x}</span>`).join('')||'<span class="muted">无特别</span>'}</div></div>` : ''}
     </div>`;
