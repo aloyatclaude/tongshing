@@ -181,7 +181,18 @@ button,input,select{font:inherit;color:inherit}
 .hour .side{color:var(--muted);font-size:12.5px;line-height:1.7}
 .hour .side b{color:var(--ink-2);font-weight:500}
 .hour .tags{gap:4px} .hour .tag{font-size:12px;padding:1px 7px}
-.hour .mine{grid-column:3/-1;display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)}
+.hour .mine{grid-column:3/-1;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13px;color:var(--ink-2)}
+.hour .mine b{font-family:var(--serif);font-weight:600;color:var(--ink)}
+.hour.p-good{box-shadow:inset 3px 0 0 var(--good)}
+.hour.p-bad{box-shadow:inset 3px 0 0 var(--bad)}
+.lvl{display:inline-block;font-family:var(--serif);font-weight:700;font-size:12.5px;line-height:1.6;padding:0 8px;border-radius:4px;white-space:nowrap}
+.lvl.good{background:var(--good);color:#fff} .lvl.bad{background:var(--bad);color:#fff} .lvl.mid{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.hplan{display:grid;gap:10px;padding:14px 8px 16px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+.hplan .row{display:flex;gap:12px;align-items:baseline}
+.hplan .row > div{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14px}
+.hplan .row b{font-family:var(--serif);font-weight:600}
+.hplan .row small{color:var(--muted);font-size:12.5px}
+.hplan .cap{font-size:12.5px;color:var(--muted)}
 
 /* ---------- natal ---------- */
 .form{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1.5fr) minmax(0,.9fr) auto;gap:14px;align-items:end}
@@ -392,6 +403,16 @@ function parseYiJi(yi, ji){
 
 const hourRange = k => k===0 ? '23:00–00:59' : `${String(2*k-1).padStart(2,'0')}:00–${String(2*k).padStart(2,'0')}:59`;
 
+const lvlBadge = lv => `<span class="lvl ${lv==='宜用'?'good':lv==='慎用'?'bad':'mid'}">${lv}</span>`;
+function hourPlan(dh){
+  const item = (h, pos) => `<span><b>${h.zhi}时</b> <small>${hourRange(h.k)}</small> <small>（${h.reasons.filter(r => pos ? r.w > 0 : r.w < 0).slice(0,2).map(r=>r.label).join('、')}）</small></span>`;
+  return `<div class="hplan">
+    <div class="cap">按你的八字，综合黄道黑道、时家神煞、与你的冲合及五行喜忌</div>
+    <div class="row">${lvlBadge('宜用')}<div>${dh.best.map(h=>item(h,true)).join('') || '<span class="muted">今天没有特别适合你的时辰</span>'}</div></div>
+    <div class="row">${lvlBadge('慎用')}<div>${dh.avoid.map(h=>item(h,false)).join('') || '<span class="muted">今天没有需要特别避开的时辰</span>'}</div></div>
+  </div>`;
+}
+
 function renderToday(){
   const solar = Solar.fromDate(cur), l = solar.getLunar();
   const jq = l.getJieQi();
@@ -414,21 +435,22 @@ function renderToday(){
     {name:'煞', dir:DIR_ALIAS[l.getDaySha()]||l.getDaySha(), color:'var(--bad)'},
   ];
 
+  const dh = me ? P.dayHours(me, l) : null;
   const hours = l.getTimes().slice(0,12).map((t,k) => {
     const lo = k===0 ? 23 : 2*k-1, hi = k===0 ? 0 : 2*k;
     const now = isToday && (k===0 ? (nowH===23||nowH===0) : (nowH===lo||nowH===hi));
     const g = t.getTianShenLuck()==='吉';
     const sha = P.hourSha(l,t);
     const hy = parseYiJi(t.getYi(), t.getJi());
-    const mine = me ? P.hourTags(me,t) : [];
-    return `<div class="hour ${now?'now':''}">
+    const hp = dh ? dh.hours[k] : null;
+    return `<div class="hour ${now?'now':''} ${hp ? (hp.level==='宜用'?'p-good':hp.level==='慎用'?'p-bad':'') : ''}">
       <div class="t"><b>${t.getZhi()}时${now?' <span class="nowtag">· 现在</span>':''}</b><span>${hourRange(k)}</span><br><span>${t.getGanZhi()}</span></div>
       <div class="luck ${g?'good':'bad'}">${t.getTianShen()}<small>${t.getTianShenType()} · ${t.getTianShenLuck()}</small></div>
       <div><div class="tags">${sha.map(([x,b])=>`<span class="tag ${b?'bad':'good'}">${x}</span>`).join('')||'<span class="muted">—</span>'}</div>
         <div class="muted" style="font-size:12px;margin-top:6px">${t.getNineStar().toString()}</div></div>
       <div class="yj-line"><div><i class="y">宜</i>${hy.yiItems.join(' ')}</div><div><i class="j">忌</i>${hy.allBad?'<b style="color:var(--bad);font-weight:600">诸事不宜</b>':hy.jiItems.join(' ')}</div></div>
       <div class="side"><div>冲<b>${t.getChongDesc()}</b> 煞<b>${t.getSha()}</b></div><div>财神<b>${t.getPositionCaiDesc()}</b> 喜神<b>${t.getPositionXiDesc()}</b></div></div>
-      ${me ? `<div class="mine"><span>与你</span><div class="tags">${mine.map(([x,b])=>`<span class="tag ${b?'bad':'gold'}">${x}</span>`).join('')||'<span class="muted">无特别</span>'}</div></div>` : ''}
+      ${hp ? `<div class="mine">${lvlBadge(hp.level)}<span><b>${hp.ss}时</b>　${hp.ssDesc}</span><span class="tags">${hp.reasons.map(r=>`<span class="tag ${r.w>0?'good':'bad'}">${r.label}</span>`).join('')}${hp.neutral.map(x=>`<span class="tag">${x}</span>`).join('')}</span></div>` : ''}
     </div>`;
   }).join('');
 
@@ -503,6 +525,7 @@ function renderToday(){
 
   <div class="section-title">时辰吉凶</div>
   <section class="card" style="padding:12px 16px">${chkBtn('时辰', true)}
+    ${dh ? hourPlan(dh) : ''}
     <div class="hours">${hours}</div>
   </section>`;
 }
@@ -566,12 +589,14 @@ function todayCard(n, l, wx){
   const good = t.sha.filter(s => !BAD_SHA.includes(s));
   const badR = t.rels.filter(r => r.bad);
   const wxTxt = t.wxScore > 0 ? '今日干支五行是你的喜用，做事较顺' : t.wxScore < 0 ? '今日干支五行属你的忌神，凡事多留余地' : '今日五行对你喜忌参半';
-  const best = l.getTimes().slice(0,12).filter(h => { const tg = P.hourTags(n,h); return tg.some(x=>!x[1]) && !tg.some(x=>x[1]); }).map(h=>h.getZhi()+'时');
+  const dh = P.dayHours(n, l);
+  const best = dh.best.map(h=>h.zhi+'时'), avoid = dh.avoid.map(h=>h.zhi+'时');
   const parts = [`今天是你的<b>${t.ss}日</b>`];
   if (good.length) parts.push(`${good.join('、')}到位`);
   parts.push(wxTxt);
   if (badR.length) parts.push(`留意今日${badR.map(r=>r.t+'你的'+r.where.replace(/（.*）/,'')).join('、')}`);
-  if (best.length) parts.push(`较好的时辰：${best.join('、')}`);
+  if (best.length) parts.push(`对你较好的时辰：${best.join('、')}`);
+  if (avoid.length) parts.push(`尽量避开：${avoid.join('、')}`);
   const stars = `<span>${'★'.repeat(t.stars)}</span><span class="off">${'★'.repeat(5-t.stars)}</span>`;
   return `<section class="card you">
     <div class="head"><div class="title">${t.gz}日 · 你的<em>${t.ss}日</em></div><div><span class="stars" title="综合参考分">${stars}</span> ${chkBtn('个人今日')}</div></div>

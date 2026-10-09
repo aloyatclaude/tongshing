@@ -200,5 +200,52 @@ function hourSha(l, t){
   return out;
 }
 
-return {GAN, ZHI, WX, GAN_WX, ZHI_WX, SX, SS_DESC, SHA_DESC, PALACE_SHORT, shiShen, shiShenZhi, build, today, hourTags, hourSha, gi, zi};
+// 个人化时辰：天时（黄道/黑道、时家神煞）+ 人（十神、个人神煞、冲合刑害、五行喜忌）
+const HOUR_SS = {
+  比肩:'合作、独立处理事情', 劫财:'防破财、避免争执', 食神:'社交、饮食、创作', 伤官:'表达、谈判，但要慎言',
+  偏财:'把握机会、谈生意', 正财:'收款、理财、谈钱', 七杀:'处理难题、竞争', 正官:'见上司、办公事、签约',
+  偏印:'研究、思考、独处', 正印:'求助长辈、学习、签文件',
+};
+const GEN_W = {日禄:.5, 天乙贵人:.5, 文昌:.25, 日合:.25, 三合:.25, 日破:-1, 五不遇:-1, 截路空亡:-.5, 旬空:-.5, 日刑:-.5, 日害:-.5, 六破:-.25};
+const PER_W = {天乙贵人:1, 禄:.75, 文昌:.5, 将星:.25, 天喜:.25, 红鸾:.25, 羊刃:-.75, 劫煞:-.25, 亡神:-.25, 空亡:-.25, 桃花:0, 驿马:0, 华盖:0};
+const PER_LABEL = {天乙贵人:'你的贵人时', 禄:'你的禄时', 文昌:'你的文昌时', 空亡:'你的空亡时'};
+const PAL_NAME = ['生肖','月支','日支','时支'];
+function hourPersonal(n, l, t){
+  const hg = t.getGan(), hz = t.getZhi(), items = [];
+  const add = (label, w) => items.push({label, w});
+  const lucky = t.getTianShenLuck() === '吉';
+  add(t.getTianShen() + (lucky ? '黄道' : '黑道'), lucky ? .75 : -.75);
+  hourSha(l, t).forEach(([x]) => { if (GEN_W[x]) add(x, GEN_W[x]); });
+  shaFor(n, hz).forEach(s => add(PER_LABEL[s] || '你的' + s, PER_W[s] || 0));
+  n.zhi.forEach((z, k) => {
+    if (!z) return;
+    zhiRel(hz, z).forEach(r => {
+      // 日支（自己）与生肖看全部关系；月支、时支只看冲
+      if ((k === 1 || k === 3) && r.t !== '冲') return;
+      const w = r.t === '冲' ? [-1.25, -.25, -1.5, -.25][k] : r.bad ? (k === 2 ? -.5 : -.25) : (k === 2 ? .5 : .25);
+      add(`${r.t === '六合' ? '合' : r.t}你${PAL_NAME[k]}`, w);
+    });
+  });
+  let wx = 0;
+  [GAN_WX[gi(hg)], ZHI_WX[zi(hz)]].forEach(e => { if (n.st.xi.includes(e)) wx += .5; else if (n.st.ji.includes(e)) wx -= .5; });
+  if (wx > 0) add('五行喜用', wx); else if (wx < 0) add('五行属忌', wx);
+  const score = items.reduce((a, b) => a + b.w, 0);
+  let level = score >= 1 ? '宜用' : score <= -1.25 ? '慎用' : '平';
+  // 冲你日支或生肖的时辰：择时首要避开，最多评为「平」
+  if (items.some(i => i.label === '冲你日支' || i.label === '冲你生肖')) level = score >= 1 ? '平' : '慎用';
+  // 原因：先列与结论同方向的，再按影响大小
+  const sign = level === '宜用' ? 1 : level === '慎用' ? -1 : 0;
+  const reasons = items.filter(i => i.w).sort((a, b) => (sign && (Math.sign(b.w) === sign) - (Math.sign(a.w) === sign)) || Math.abs(b.w) - Math.abs(a.w)).slice(0, 3);
+  const neutral = items.filter(i => i.w === 0).map(i => i.label);
+  const ss = shiShen(n.dayGan, hg);
+  return {zhi: hz, ss, ssDesc: HOUR_SS[ss], score, level, reasons, neutral, items};
+}
+function dayHours(n, l){
+  const hours = l.getTimes().slice(0, 12).map((t, k) => ({...hourPersonal(n, l, t), k}));
+  const best = hours.filter(h => h.level === '宜用').sort((a, b) => b.score - a.score).slice(0, 3);
+  const avoid = hours.filter(h => h.level === '慎用').sort((a, b) => a.score - b.score).slice(0, 3);
+  return {hours, best, avoid};
+}
+
+return {GAN, ZHI, WX, GAN_WX, ZHI_WX, SX, SS_DESC, SHA_DESC, PALACE_SHORT, shiShen, shiShenZhi, build, today, hourTags, hourSha, hourPersonal, dayHours, gi, zi};
 })();
