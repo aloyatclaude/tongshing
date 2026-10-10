@@ -91,19 +91,6 @@ function shaFor(n, z){ // 地支 z 对本命触发的神煞
   return out;
 }
 
-// 身强弱 + 喜忌（近似：月令加倍，藏干按本中余气加权）
-function strength(n){
-  const w = [0,0,0,0,0], me = GAN_WX[gi(n.dayGan)];
-  n.gan.forEach((g,k) => { if (k !== 2 && g) w[GAN_WX[gi(g)]] += 1; });
-  n.hide.forEach((hs,k) => { if (!hs) return; hs.forEach((g,m) => { w[GAN_WX[gi(g)]] += [1,0.5,0.3][m] * (k===1?2:1); }); });
-  const total = w.reduce((a,b)=>a+b,0), support = w[me] + w[(me+4)%5], ratio = support/total;
-  const strong = ratio >= 0.5;
-  const xi = strong ? [(me+1)%5,(me+2)%5,(me+3)%5] : [(me+4)%5, me];
-  const ji = strong ? [(me+4)%5, me] : [(me+1)%5,(me+2)%5,(me+3)%5];
-  const label = ratio > 0.8 ? '极强' : ratio > 0.58 ? '偏强' : ratio >= 0.5 ? '中和偏强' : ratio >= 0.42 ? '中和偏弱' : ratio >= 0.2 ? '偏弱' : '极弱';
-  return {w, ratio, strong, xi, ji, label, special: ratio > 0.8 || ratio < 0.2};
-}
-
 function build(p){
   const [y,m,d] = p.date.split('-').map(Number);
   const [hh,mm] = p.time ? p.time.split(':').map(Number) : [12,0];
@@ -120,7 +107,10 @@ function build(p){
     dayGan: ec.getDayGan(), xunKong: ec.getDayXunKong(),
   };
   n.me = GAN_WX[gi(n.dayGan)];
-  n.st = strength(n);
+  // 喜用：扶抑 + 调候（《穷通宝鉴》），见 xiyong.js
+  const xy = XY.predict(pillars);
+  n.xy = xy;
+  n.st = { xi: xy.xi.map(e => WX.indexOf(e)), ji: xy.ji.map(e => WX.indexOf(e)) };
   n.natalSha = {};
   n.zhi.forEach((z,k) => { if (z) shaFor(n, z).filter(s => s!=='空亡').forEach(s => (n.natalSha[s] ||= []).push(PALACE_SHORT[k])); });
   n.count = [0,0,0,0,0];

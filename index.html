@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.7/lunar.js"></script>
 <script src="personal.js"></script>
+<script src="xiyong.js"></script>
 <style>
 :root{
   --bg:#f5f2ec; --surface:#ffffff; --surface-2:#faf8f4; --line:#e7e1d7; --line-2:#d9d1c4;
@@ -304,7 +305,7 @@ footer .btn{font-size:12.5px;padding:4px 12px}
   </main>
 
   <footer>
-    <span>依《协纪辨方书》规则推算（lunar-javascript）；当旺五行、个人神煞、喜用为本站按规则计算，仅供参考。所有计算在你的浏览器内完成，资料不会上传。</span>
+    <span>依《协纪辨方书》规则推算（lunar-javascript）；当旺五行、个人神煞依传统规则计算；喜用依扶抑与调候推定。所有计算在你的浏览器内完成，资料不会上传。</span>
     <span class="tools">
       <button class="btn ghost" id="cmp">对比模式</button>
       <button class="btn ghost" id="export">导出对比记录</button>
@@ -538,11 +539,15 @@ const ganC = g => `<span style="color:${wxc(P.GAN_WX[P.gi(g)])}">${g}</span>`;
 const zhiC = z => `<span style="color:${wxc(P.ZHI_WX[P.zi(z)])}">${z}</span>`;
 const wxB = i => `<b class="serif" style="color:${wxc(i)}">${P.WX[i]}</b>`;
 
+const gejuName = g => g === '正格' ? '正格' : g + '格';
+
 function natalCard(n){
   const cols = ['年柱','月柱','日柱','时柱'];
   const cell = (k, f) => n.pillars[k] ? f(k) : '<span class="muted">—</span>';
   const row = (name, f) => `<tr><th class="row">${name}</th>${cols.map((_,k)=>`<td class="${k===2?'day':''}">${cell(k,f)}</td>`).join('')}</tr>`;
-  const st = n.st, maxC = Math.max(...n.count);
+  const st = n.st, x = n.xy, maxC = Math.max(...n.count);
+  const ROLES = ['比劫','食伤','财','官杀','印'];
+  const yongEl = x.yong ? (n.me + ROLES.indexOf(x.yong)) % 5 : null;
   const que = P.WX.filter((_,i)=>n.count[i]===0);
   const curY = new Date().getFullYear();
   return `
@@ -560,13 +565,15 @@ function natalCard(n){
   </section>
 
   <div class="grid2">
-    <section class="card">${secH('日主与五行', '近似估算')}
+    <section class="card">${secH('日主与喜用', '扶抑 + 调候')}
       <dl class="kv">
-        <dt>日主</dt><dd><b class="serif" style="font-size:17px">${ganC(n.dayGan)}${P.WX[n.me]}</b>　${n.st.label}（扶助 ${Math.round(st.ratio*100)}%）</dd>
-        <dt>喜用</dt><dd>${st.xi.map(wxB).join('　')}</dd>
-        <dt>忌神</dt><dd>${st.ji.map(wxB).join('　')}</dd>
+        <dt>日主</dt><dd><b class="serif" style="font-size:17px">${ganC(n.dayGan)}${P.WX[n.me]}</b>　${x.qr || gejuName(x.geju)}</dd>
+        <dt>格局</dt><dd>${x.geju === '正格' ? '正格' : gejuName(x.geju)}</dd>
+        <dt>用神</dt><dd>${yongEl !== null ? wxB(yongEl) + '　' : ''}${x.how}</dd>
+        ${x.tiaohou ? `<dt>调候</dt><dd>${x.tiaohouUsed ? `生于${n.zhi[1]}月，以调候为急，取${x.tiaohouUsed}为喜` : `《穷通宝鉴》此月宜${[...x.tiaohou].join('、')}；春秋以扶抑为主`}</dd>` : ''}
+        <dt>喜</dt><dd>${st.xi.map(wxB).join('　')}</dd>
+        <dt>忌</dt><dd>${st.ji.map(wxB).join('　')}</dd>
       </dl>
-      ${st.special?'<div class="note" style="color:var(--bad)">五行偏于极端，可能是从格等特殊格局，喜用需人工判断。</div>':''}
       <div class="bars" style="margin-top:18px">${P.WX.map((w,i)=>`<div class="bar"><span class="el" style="color:${wxc(i)}">${w}</span><div class="track"><div class="fill" style="width:${maxC?n.count[i]/maxC*100:0}%;background:${wxc(i)}"></div></div><span class="st">${n.count[i]}</span></div>`).join('')}</div>
       <div class="note">五行个数按天干及地支本气计算${que.length?`，命中缺${que.join('、')}`:''}。</div>
     </section>
@@ -580,7 +587,7 @@ function natalCard(n){
 
   <section class="card">${secH('大运', n.dayun ? n.yunStart : '填写性别后显示')}
     ${n.dayun ? `<div class="dayun">${n.dayun.map(d=>`<div class="${d.getStartYear()<=curY&&curY<=d.getEndYear()?'cur':''}"><b>${d.getGanZhi()}</b>${d.getStartYear()}<br>${P.shiShen(n.dayGan,d.getGanZhi()[0])}</div>`).join('')}</div>` : '<p class="muted" style="margin:0">选择性别后即可排出大运。</p>'}
-    <div class="note">喜用为程序按「月令加倍、藏干加权」估算的近似值，正式论命请以命理师核定为准。出生时间按当地钟表时间，未做真太阳时校正。</div>
+    <div class="note">喜用依扶抑与调候（《穷通宝鉴》）推定。出生时间按当地钟表时间。</div>
   </section>`;
 }
 
