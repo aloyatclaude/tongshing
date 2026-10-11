@@ -392,42 +392,51 @@ const XUETANG = {金:'巳', 木:'亥', 水:'申', 土:'申', 火:'寅'}, CIGUAN 
 const KUIGANG = ['壬辰','庚戌','戊戌','庚辰'];
 const YINYANG_CUO = ['丙子','丁丑','戊寅','辛卯','壬辰','癸巳','丙午','丁未','戊申','辛酉','壬戌','癸亥'];
 const SHI_E = ['甲辰','乙巳','丙申','丁亥','戊戌','己丑','庚辰','辛巳','壬申','癸亥'];
-function natalShensha(n){
-  const out = [[],[],[],[]], put = (k, x) => { if (n.pillars[k] && !out[k].includes(x)) out[k].push(x); };
-  const ks = [0,1,2,3].filter(k => n.pillars[k]), dg = n.dayGan, yg = n.gan[0], yz = n.zhi[0], mz = n.zhi[1];
-  const zhiHit = (targets, name, skip = -1) => ks.forEach(k => { if (k !== skip && targets.includes(n.zhi[k])) put(k, name); });
-  zhiHit(NS.天乙[dg] + NS.天乙[yg], '天乙贵人');
-  zhiHit(NS.太极[yg], '太极贵人');
-  zhiHit(NS.文昌[dg] + NS.文昌[yg], '文昌贵');
-  zhiHit(NS.文昌星[dg] + NS.文昌星[yg], '文昌');
-  zhiHit(NS.国印[dg] + NS.国印[yg], '国印贵人');
-  zhiHit(NS.福星[dg] + NS.福星[yg], '福星贵人');
-  zhiHit(NS.禄[dg], '禄神');
-  if (NS.羊刃[dg]) zhiHit(NS.羊刃[dg], '羊刃');
-  zhiHit(NS.金舆[dg], '金舆');
-  zhiHit(NS.红艳[dg], '红艳');
-  zhiHit(NS.流霞[dg], '流霞');
+// 神煞总表：33 条规则，每条给出查法与出处。shenshaAll(n) 回传 [{name, how, src, hits:[柱序…], good}]；
+// 另可传入额外干支（大运、流年），当作第 5 柱一起查（hits 里以 4 表示）。
+const SS_RULES = [
+  ['天乙贵人', '日干、年干查地支', '渊海子平', 'good'], ['太极贵人', '年干查地支', '渊海子平', 'good'], ['文昌', '日干、年干查地支（星宗口诀，辛见戌）', '星学大成', 'good'],
+  ['文昌贵', '日干、年干查地支', '三命通会', 'good'], ['国印贵人', '日干、年干查地支（禄前第九位）', '古今图书集成', 'good'], ['福星贵人', '日干、年干查地支', '渊海子平', 'good'],
+  ['禄神', '日干查地支', '渊海子平', 'good'], ['羊刃', '日干查地支（五阳干）', '渊海子平', 'bad'], ['金舆', '日干查地支（禄前二位）', '渊海子平', 'good'],
+  ['红艳', '日干查地支', '星学大成', 'mid'], ['流霞', '日干查地支', '星学大成', 'bad'],
+  ['驿马', '年支三合查地支', '三命通会', 'mid'], ['桃花', '年支、日支三合查地支', '三命通会、神峰通考', 'mid'], ['华盖', '年支三合查地支', '三命通会', 'mid'],
+  ['将星', '年支三合查地支', '三命通会', 'good'], ['劫煞', '年支三合查地支', '三命通会', 'bad'], ['亡神', '年支三合查地支', '三命通会', 'bad'],
+  ['血刃', '年支查地支（子加戌逆数）', '星学大成、三命通会', 'bad'], ['红鸾', '年支查地支（子加卯逆数）', '星学大成', 'good'], ['天喜', '年支查地支（红鸾对宫）', '星学大成', 'good'],
+  ['孤辰', '年支查地支', '三命通会', 'bad'], ['寡宿', '年支查地支', '三命通会', 'bad'], ['学堂', '年纳音查地支', '渊海子平', 'good'], ['词馆', '年纳音查地支', '三命通会', 'good'],
+  ['天德贵人', '月支查天干（申亥寅巳月查地支）', '渊海子平', 'good'], ['月德贵人', '月支查天干', '渊海子平', 'good'], ['天德合', '月支查天干', '协纪辨方书', 'good'], ['月德合', '月支查天干', '协纪辨方书', 'good'],
+  ['天罗', '年支戌亥互见', '三命通会', 'bad'], ['地网', '年支辰巳互见', '三命通会', 'bad'],
+  ['魁罡', '日柱', '渊海子平', 'mid'], ['十恶大败', '日柱', '三命通会', 'bad'], ['阴差阳错', '月、日、时柱', '三命通会', 'bad'],
+];
+function shenshaAll(n, extra){   // extra: 干支字符串（大运或流年），可省略
+  const gan = [...n.gan], zhi = [...n.zhi], pil = [...n.pillars];
+  if (extra) { gan[4] = extra[0]; zhi[4] = extra[1]; pil[4] = extra; }
+  const ks = [0,1,2,3,4].filter(k => pil[k]), dg = n.dayGan, yg = n.gan[0], yz = n.zhi[0], mz = n.zhi[1];
+  const hits = {}; SS_RULES.forEach(([nm]) => hits[nm] = []);
+  const put = (k, x) => { if (pil[k] && !hits[x].includes(k)) hits[x].push(k); };
+  const zhiHit = (targets, name, skip = -1) => ks.forEach(k => { if (k !== skip && targets.includes(zhi[k])) put(k, name); });
+  zhiHit(NS.天乙[dg] + NS.天乙[yg], '天乙贵人'); zhiHit(NS.太极[yg], '太极贵人');
+  zhiHit(NS.文昌星[dg] + NS.文昌星[yg], '文昌'); zhiHit(NS.文昌[dg] + NS.文昌[yg], '文昌贵'); zhiHit(NS.国印[dg] + NS.国印[yg], '国印贵人');
+  zhiHit(NS.福星[dg] + NS.福星[yg], '福星贵人'); zhiHit(NS.禄[dg], '禄神'); if (NS.羊刃[dg]) zhiHit(NS.羊刃[dg], '羊刃');
+  zhiHit(NS.金舆[dg], '金舆'); zhiHit(NS.红艳[dg], '红艳'); zhiHit(NS.流霞[dg], '流霞');
   const [ma, tao, hua, jiang, jie, wang] = SANHE4[zi(yz) % 4];
   zhiHit(ma, '驿马', 0); zhiHit(tao, '桃花', 0); zhiHit(hua, '华盖', 0); zhiHit(jiang, '将星', 0); zhiHit(jie, '劫煞', 0); zhiHit(wang, '亡神', 0);
-  zhiHit(SANHE4[zi(n.zhi[2]) % 4][1], '桃花', 2);   // 咸池亦可以日支起（神峰通考）
+  zhiHit(SANHE4[zi(n.zhi[2]) % 4][1], '桃花', 2);
   zhiHit(XUEREN(yz), '血刃', 0);
   const hl = HONGLUAN(yz); zhiHit(hl, '红鸾', 0); zhiHit(ZHI[(zi(hl) + 6) % 12], '天喜', 0);
   const gg = Object.entries(GU_GUA).find(([g]) => g.includes(yz))[1]; zhiHit(gg[0], '孤辰', 0); zhiHit(gg[1], '寡宿', 0);
   const nyWx = n.nayin[0].slice(-1); zhiHit(XUETANG[nyWx], '学堂', 0); zhiHit(CIGUAN[nyWx], '词馆', 0);
-  // 天德、月德及其合：按月支，看各柱天干（天德落在申亥寅巳时看地支）
   const td = TIANDE[zi(mz)], yd = YUEDE[zi(mz) % 4], tdh = TIANDE_HE[mz], ydh = YUEDE_HE[zi(mz) % 4];
-  ks.forEach(k => { const g = n.gan[k], z = n.zhi[k];
+  ks.forEach(k => { const g = gan[k], z = zhi[k];
     if (g === td || z === td) put(k, '天德贵人'); if (g === yd) put(k, '月德贵人');
     if (tdh && g === tdh) put(k, '天德合'); if (g === ydh) put(k, '月德合'); });
-  // 天罗地网（三命通会：戌人得亥、亥人得戌为天罗；辰人得巳、巳人得辰为地网）
   const luo = {戌:'亥', 亥:'戌'}[yz], wangZ = {辰:'巳', 巳:'辰'}[yz];
   if (luo) zhiHit(luo, '天罗', 0); if (wangZ) zhiHit(wangZ, '地网', 0);
-  // 日柱类
-  if (KUIGANG.includes(n.pillars[2])) put(2, '魁罡');
-  if (SHI_E.includes(n.pillars[2])) put(2, '十恶大败');
-  [1,2,3].forEach(k => { if (n.pillars[k] && YINYANG_CUO.includes(n.pillars[k])) put(k, '阴差阳错'); });
-  return out;
+  if (KUIGANG.includes(pil[2])) put(2, '魁罡');
+  if (SHI_E.includes(pil[2])) put(2, '十恶大败');
+  [1,2,3].forEach(k => { if (pil[k] && YINYANG_CUO.includes(pil[k])) put(k, '阴差阳错'); });
+  return SS_RULES.map(([name, how, src, good]) => ({name, how, src, good, hits: hits[name]}));
 }
+function natalShensha(n){ const out = [[],[],[],[]]; shenshaAll(n).forEach(r => r.hits.forEach(k => { if (k < 4) out[k].push(r.name); })); return out; }
 
 function dayHours(n, l){
   const hours = l.getTimes().slice(0, 12).map((t, k) => ({...hourPersonal(n, l, t), k}));
@@ -436,5 +445,5 @@ function dayHours(n, l){
   return {hours, best, avoid};
 }
 
-return {GAN, ZHI, WX, GAN_WX, ZHI_WX, SX, SS_DESC, SHA_DESC, PALACE_SHORT, shiShen, shiShenZhi, build, today, hourTags, hourSha, hourPersonal, dayHours, luckyColor, changSheng, relations, power, liuYue, natalShensha, ZHI_MAIN, zhiRelPublic: zhiRel, gi, zi};
+return {GAN, ZHI, WX, GAN_WX, ZHI_WX, SX, SS_DESC, SHA_DESC, PALACE_SHORT, shiShen, shiShenZhi, build, today, hourTags, hourSha, hourPersonal, dayHours, luckyColor, changSheng, relations, power, liuYue, natalShensha, shenshaAll, SS_RULES, ZHI_MAIN, zhiRelPublic: zhiRel, gi, zi};
 })();

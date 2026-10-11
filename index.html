@@ -238,11 +238,22 @@ button,input,select{font:inherit;color:inherit}
 .relh{font-family:var(--serif);font-weight:700;font-size:15.5px;color:var(--ink);margin:16px 0 8px}
 .bars.ss .bar{grid-template-columns:42px minmax(0,1fr) 38px}
 .bars.ss .el{font-size:14px;font-weight:600}
-.dygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px}
+.sstab{display:grid;gap:2px;font-size:13.5px}
+.ssr{display:grid;grid-template-columns:88px 92px minmax(0,1fr);gap:8px;align-items:center;padding:5px 6px;border-radius:var(--r2)}
+.ssr.on{background:var(--surface-2)} .ssr.off{opacity:.55}
+.ssr .nm .chip{font-size:13px;padding:2px 7px}
+.ssr .pil b{display:inline-block;font-weight:600;font-size:12.5px;color:var(--ink);background:var(--surface);border:1px solid var(--line-2);border-radius:3px;padding:0 5px;margin-right:3px}
+.ssr .how{font-size:12.5px;color:var(--muted);line-height:1.4} .ssr .how i{font-style:normal;display:block;font-size:11.5px;opacity:.85}
+@media (max-width:639px){ .ssr{grid-template-columns:84px minmax(0,1fr)} .ssr .how{grid-column:1 / -1;padding-left:2px} }
+.dysha{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 4px;margin-top:4px;padding-top:4px;border-top:1px dashed var(--line);font-size:11px;line-height:1.4;width:100%}
+.dysha i{font-style:normal;padding:0 3px;border-radius:3px}
+.dysha i.good{color:var(--good);background:var(--good-soft)} .dysha i.bad{color:var(--bad);background:var(--bad-soft)} .dysha i.mid{color:var(--mid);background:var(--mid-soft)}
+.dygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
 .dy{display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 2px;border:1px solid var(--line);border-radius:var(--r2);background:var(--surface);cursor:pointer;font:inherit;font-size:12px;color:var(--ink-2);line-height:1.5}
 .dy b{font-family:var(--serif);font-size:17px;font-weight:700}
 .dy.cur{border-color:var(--accent)} .dy.sel{background:var(--accent-soft);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
-.lngrid,.lygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px}
+.lngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:6px}
+.lygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px}
 .lngrid div,.lygrid div{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 2px;border:1px solid var(--line);border-radius:var(--r2);font-size:12px;color:var(--ink-2);line-height:1.5}
 .lngrid b,.lygrid b{font-family:var(--serif);font-size:16px;font-weight:700}
 .lngrid .cur{border-color:var(--accent);background:var(--accent-soft)}
@@ -721,7 +732,9 @@ function natalCard(n){
   const row = (name, f, cls = '') => `<tr class="${cls}"><th class="row">${name}</th>${cols.map((_,k) => `<td class="${k===2?'day':''}">${cell(k,f)}</td>`).join('')}</tr>`;
   const st = n.st, x = n.xy, ROLES = ['比劫','食伤','财','官杀','印'], curY = new Date().getFullYear();
   const yongEl = x.yong ? (n.me + ROLES.indexOf(x.yong)) % 5 : null, pw = P.power(n), rel = P.relations(n), kong = ec.getDayXunKong(), gua = mingGua(n);
-  const shaP = P.natalShensha(n);
+  const shaP = P.natalShensha(n), ssAll = P.shenshaAll(n);
+  const extraSha = gz => P.shenshaAll(n, gz).filter(r => r.hits.includes(4));
+  const shaLine = gz => { const h = extraSha(gz); return h.length ? `<span class="dysha">${h.map(r => `<i class="${r.good}">${r.name}</i>`).join('')}</span>` : '<span class="dysha muted">—</span>'; };
   const sxOf = z => `${z}（${P.SX[P.zi(z)]}）`, ns = (tbl, key) => [...(tbl[key] || '')].map(sxOf).join('、');
   const info = [
     ['阳历', `${by}年${n.solar.getMonth()}月${n.solar.getDay()}日${n.hasTime ? ' ' + n.p.time : ''}`],
@@ -761,6 +774,8 @@ function natalCard(n){
       ${row('神煞', k => shaP[k].length ? `<div class="shacol">${shaP[k].map(s => chip(s, s, NATAL_BAD.includes(s) ? 'bad' : NATAL_MID.includes(s) ? '' : 'good', '命带神煞')).join('')}</div>` : '<span class="muted">—</span>', 'sharow')}
     </table></div>
     <div class="note">颜色代表五行：${P.WX.map((w,i) => `<b class="serif" style="color:${wxc(i)}">${w}</b>`).join(' ')}。神煞只列有古籍原文的（《渊海子平》《三命通会》《协纪辨方书》），点开可看出处。</div>
+    <div class="relh">神煞总表 <small class="muted" style="font-weight:400">${ssAll.filter(r => r.hits.length).length} / ${ssAll.length} 条命中</small></div>
+    <div class="sstab">${ssAll.map(r => `<div class="ssr ${r.hits.length ? 'on ' + r.good : 'off'}"><span class="nm">${r.hits.length ? chip(r.name, r.name, r.good === 'bad' ? 'bad' : r.good === 'mid' ? '' : 'good', '命带神煞') : t(r.name, r.name, '命带神煞')}</span><span class="pil">${r.hits.length ? r.hits.map(k => `<b>${'年月日时'[k]}柱</b>`).join('') : '<span class="muted">—</span>'}</span><span class="how">${r.how}<i>${r.src}</i></span></div>`).join('')}</div>
     ${rel.length ? `<div class="relh">干支关系</div><div class="chips">${rel.map(r => `<span class="chip ${r.good ? 'good' : 'bad'}" style="cursor:default">${r.t}<small>· ${r.where}</small></span>`).join('')}</div>` : ''}
   </section>
   <section class="card">
@@ -782,11 +797,11 @@ function natalCard(n){
   <section class="card span2">
     <div class="card-h"><h2>大运</h2><span class="sub">${n.dayun ? n.yunStart : '填写性别后显示'}</span></div>
     ${dys.length ? `<div class="dygrid">${dys.map((d, i) => { const gz = d.getGanZhi();
-      return `<button class="dy ${i === curDy ? 'cur' : ''} ${i === selDy ? 'sel' : ''}" data-dy="${i}"><b>${ganC(gz[0])}${zhiC(gz[1])}</b><span>${P.shiShen(n.dayGan, gz[0])}·${ssZ(gz[1])}</span><span>${d.getStartYear()}–${d.getEndYear()}</span><span class="muted">${n.yunAge[0] + i * 10}–${n.yunAge[0] + i * 10 + 9}岁</span></button>`; }).join('')}</div>
+      return `<button class="dy ${i === curDy ? 'cur' : ''} ${i === selDy ? 'sel' : ''}" data-dy="${i}"><b>${ganC(gz[0])}${zhiC(gz[1])}</b><span>${P.shiShen(n.dayGan, gz[0])}·${ssZ(gz[1])}</span><span>${d.getStartYear()}–${d.getEndYear()}</span><span class="muted">${n.yunAge[0] + i * 10}–${n.yunAge[0] + i * 10 + 9}岁</span>${shaLine(gz)}</button>`; }).join('')}</div>
     <div class="relh">${dySel.getGanZhi()}运的流年</div>
     <div class="lngrid">${dySel.getLiuNian().map(y => { const gz = y.getGanZhi();
-      return `<div class="${y.getYear() === curY ? 'cur' : ''}"><span>${y.getYear()}</span><b>${ganC(gz[0])}${zhiC(gz[1])}</b><span>${P.shiShen(n.dayGan, gz[0])}</span><span class="muted">${y.getYear() - by}岁</span></div>`; }).join('')}</div>
-    <div class="note">按《三命通会》「三日折一岁」推算交运时间，岁数为周岁（不进位）。有些命盘把零头进一岁，所以会多写一岁。</div>` : '<p class="muted" style="margin:0">选择性别后即可排出大运。</p>'}
+      return `<div class="${y.getYear() === curY ? 'cur' : ''}"><span>${y.getYear()}</span><b>${ganC(gz[0])}${zhiC(gz[1])}</b><span>${P.shiShen(n.dayGan, gz[0])}</span><span class="muted">${y.getYear() - by}岁</span>${shaLine(gz)}</div>`; }).join('')}</div>
+    <div class="note">按《三命通会》「三日折一岁」推算交运时间，岁数为周岁（不进位）。每格下方是这步大运／流年的干支引动你命中的神煞（绿吉、红凶、灰中性）。</div>` : '<p class="muted" style="margin:0">选择性别后即可排出大运。</p>'}
   </section>
   <section class="card">
     <div class="card-h"><h2>流年流月</h2><span class="sub ynav"><button class="iconbtn sm" data-ny="-1" aria-label="上一年">‹</button>${natalYear}<button class="iconbtn sm" data-ny="1" aria-label="下一年">›</button></span></div>
