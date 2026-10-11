@@ -2,274 +2,405 @@
 <html lang="zh">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>每日通胜</title>
 <meta name="description" content="每日通胜宜忌、神煞、方位、时辰吉凶，并按个人生辰八字解读今日。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<script>try{ if (localStorage.getItem('ts-theme') === 'dark') document.documentElement.dataset.theme = 'dark'; }catch(e){}</script>
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.7/lunar.js"></script>
 <script src="personal.js"></script>
 <script src="xiyong.js"></script>
+<script src="glossary.js"></script>
 <style>
+/* ============ 设计令牌：颜色只表达意思 — 绿＝吉/宜，红＝凶/忌，灰＝平；品牌用金棕，不与吉凶混淆 ============ */
+/* 风格：雅致中式 — 浅色为宣纸（暖纸底、奶白卡片）、墨色字、黛青点缀；绿（玉色）＝吉/宜，红（朱砂）＝凶/忌，灰＝平。
+   预设固定浅色，不跟随系统；用户可用顶栏按钮切换深色（data-theme="dark"）。 */
 :root{
-  --bg:#f5f2ec; --surface:#ffffff; --surface-2:#faf8f4; --line:#e7e1d7; --line-2:#d9d1c4;
-  --ink:#1e1c19; --ink-2:#4f4a43; --muted:#8a8378;
-  --accent:#8c2b23; --accent-soft:#f5e9e6;
-  --good:#2e5b45; --good-soft:#e8f0eb; --bad:#9b3127; --bad-soft:#f7e9e6;
-  --gold:#9a7433; --gold-soft:#f6efe1;
-  --wood:#4d7a5a; --fire:#b0503c; --earth:#9a7638; --metal:#7c8189; --water:#3d6487;
-  --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
-  --sans:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-  --radius:10px; --shadow:0 1px 2px rgba(30,28,25,.04),0 4px 16px rgba(30,28,25,.04);
+  --bg:#efeae0; --surface:#faf7f0; --surface-2:#f4f0e7; --line:#e0d8c9; --line-2:#cdc3b1;
+  --ink:#262421; --ink-2:#4f4a42; --muted:#8a8273; --accent:#3d5a6c; --accent-soft:#e9eff2;
+  --good:#2c7a63; --good-soft:#e5f1ec; --on-good:#fff; --bad:#b8402c; --bad-soft:#f8e8e4; --on-bad:#fff;
+  --mid:#6f6a60; --mid-soft:#ece6da; --now:#a67c1f; --now-soft:#faf3e3;
+  --wood:#2f8a4c; --fire:#c8382a; --earth:#8b5e34; --metal:#b97c08; --water:#2a6bb3;
+  --r:6px; --r2:3px; --card-top:1px solid var(--line); --shadow:none;
+  --top-bg:rgba(239,234,224,.94); --top-ink:#262421; --top-muted:#8a8273; --top-line:#e0d8c9; --seal-bg:#3d5a6c; --seal-ink:#fff;
+  --serif:"Noto Serif SC","Songti SC","STSong",serif; --sans:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; --head:var(--serif);
+  --top-h:56px; --nav-h:64px;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#131210; --surface:#1b1a17; --surface-2:#211f1b; --line:#2d2a25; --line-2:#3a362f;
-    --ink:#ece6dc; --ink-2:#c3bbaf; --muted:#8f877b;
-    --accent:#d27a6d; --accent-soft:#2c1c19;
-    --good:#8dbb9f; --good-soft:#1a2620; --bad:#df8174; --bad-soft:#2c1c19;
-    --gold:#d1a85e; --gold-soft:#2a2418;
-    --wood:#86b393; --fire:#dc8a74; --earth:#cfa868; --metal:#a9aeb5; --water:#7fa6c8;
-    --shadow:none;
-  }
+:root[data-theme="dark"]{ /* 墨底、宣纸色字 */
+  --bg:#151513; --surface:#1d1d1a; --surface-2:#232320; --line:#33322e; --line-2:#45433e;
+  --ink:#ebe8e0; --ink-2:#c9c5bb; --muted:#8f8b82; --accent:#8fb1c3; --accent-soft:#1f2a30;
+  --good:#6fc3a5; --good-soft:#17291f; --on-good:#0d1a14; --bad:#ee8a73; --bad-soft:#331d17; --on-bad:#1f0f0b;
+  --mid:#a19d94; --mid-soft:#272724; --now:#d9ae52; --now-soft:#2a2414;
+  --wood:#6cc48a; --fire:#f08a74; --earth:#c99a6b; --metal:#f0c04a; --water:#74aef0;
+  --top-bg:rgba(21,21,19,.92); --top-ink:#ebe8e0; --top-muted:#8f8b82; --top-line:#33322e; --seal-bg:#8fb1c3; --seal-ink:#151513;
+  color-scheme:dark;
 }
-:root[data-theme="dark"]{
-  --bg:#131210; --surface:#1b1a17; --surface-2:#211f1b; --line:#2d2a25; --line-2:#3a362f;
-  --ink:#ece6dc; --ink-2:#c3bbaf; --muted:#8f877b;
-  --accent:#d27a6d; --accent-soft:#2c1c19;
-  --good:#8dbb9f; --good-soft:#1a2620; --bad:#df8174; --bad-soft:#2c1c19;
-  --gold:#d1a85e; --gold-soft:#2a2418;
-  --wood:#86b393; --fire:#dc8a74; --earth:#cfa868; --metal:#a9aeb5; --water:#7fa6c8;
-  --shadow:none;
-}
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+/* 雅致中式：正文也用宋体、细虚线标题 */
+body{font-family:var(--serif)}
+.daynum{font-weight:600}
+.card-h{border-bottom-style:dashed}
+
+*{box-sizing:border-box} html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
 button,input,select{font:inherit;color:inherit}
-.serif{font-family:var(--serif)}
-.muted{color:var(--muted)}
-.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+.serif{font-family:var(--serif)} .muted{color:var(--muted)}
+[hidden]{display:none!important}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
 
-/* ---------- top bar ---------- */
-.topbar{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
-.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.12em}
-.seal{width:30px;height:30px;border:1.5px solid var(--accent);color:var(--accent);border-radius:4px;display:grid;place-items:center;font-size:15px;letter-spacing:0}
-.tabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px}
-.tabs button{border:0;background:transparent;padding:5px 16px;border-radius:999px;cursor:pointer;color:var(--ink-2);font-size:14px}
-.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08);font-weight:600}
+/* ---------- 顶栏（电脑：品牌＋分页；手机：品牌＋日期） ---------- */
+.topbar{position:sticky;top:0;z-index:20;background:var(--top-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--top-line)}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;height:var(--top-h)}
+.brand{display:flex;align-items:center;gap:9px;color:var(--top-ink);font-family:var(--head);font-weight:700;font-size:18px;letter-spacing:.1em;white-space:nowrap}
+.seal{width:28px;height:28px;border-radius:var(--r2);background:var(--seal-bg);color:var(--seal-ink);display:grid;place-items:center;font-size:14px;letter-spacing:0}
+.topright{display:flex;align-items:center;gap:18px}
+.themebtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--top-line);background:transparent;color:var(--top-ink);cursor:pointer;display:grid;place-items:center}
+.themebtn svg{width:18px;height:18px}
+.toptabs{display:none;gap:22px}
+.toptabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:6px 2px;cursor:pointer;color:var(--top-muted);font-size:15px}
+.toptabs button[aria-selected="true"]{color:var(--top-ink);font-weight:600;border-bottom-color:var(--accent)}
 
-/* ---------- date bar ---------- */
-.datebar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0 16px;flex-wrap:wrap}
-.datebar .nav{display:flex;align-items:center;gap:6px}
-.iconbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;display:grid;place-items:center;font-size:16px;color:var(--ink-2)}
-.iconbtn:hover,.btn:hover{border-color:var(--ink-2)}
-.datewrap{position:relative;display:flex;align-items:center;gap:8px}
-.datepick{display:inline-flex;align-items:center;gap:8px;font-family:var(--serif);font-size:17px;font-weight:600;padding:5px 12px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer}
-.datepick:hover,.datepick:focus-visible{background:var(--surface);border-color:var(--line-2)}
+/* ---------- 日期栏 ---------- */
+.datebar{display:flex;align-items:center;gap:6px;justify-content:space-between;margin:14px 0}
+.datebar .nav{display:flex;align-items:center;gap:4px;flex:1;min-width:0}
+.iconbtn{flex:none;width:40px;height:40px;border-radius:var(--r);border:1px solid var(--line-2);background:var(--surface);cursor:pointer;display:grid;place-items:center;font-size:18px;color:var(--ink-2)}
+.datewrap{position:relative;flex:1;min-width:0;display:flex;justify-content:center}
+.datepick{display:inline-flex;align-items:center;gap:8px;font-family:var(--serif);font-size:17px;font-weight:600;padding:6px 12px;border-radius:var(--r);border:1px solid transparent;background:transparent;cursor:pointer;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.datepick:hover{background:var(--surface);border-color:var(--line-2)}
 .datepick svg{flex:none;color:var(--muted)}
-.cal{position:absolute;top:calc(100% + 8px);left:0;z-index:30;width:332px;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.14);padding:14px}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r);padding:8px 14px;cursor:pointer;font-size:14px;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.ghost{background:transparent}
+.btn.on{border-color:var(--accent);color:var(--accent)}
+
+/* ---------- 卡片 ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-top:var(--card-top);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.stack{display:flex;flex-direction:column;gap:14px}
+.card-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.card-h h2{margin:0;font-family:var(--head);font-size:19px;font-weight:700;letter-spacing:.08em;color:var(--ink);display:flex;align-items:center;gap:6px}
+.card-h h2::before{content:"";width:4px;height:19px;border-radius:2px;background:var(--accent);margin-right:4px;flex:none}
+.card-h .sub{font-size:13px;color:var(--muted)}
+.label{font-size:12.5px;color:var(--muted);letter-spacing:.06em}
+.note{font-size:13px;color:var(--muted);line-height:1.6;margin-top:10px}
+
+/* ---------- 可点击的名词（点一下看解释） ---------- */
+.t{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline dotted color-mix(in srgb,currentColor 45%,transparent);text-underline-offset:4px}
+.t:hover{text-decoration-style:solid}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:14px;line-height:1.4;padding:4px 9px;border-radius:var(--r2);background:transparent;color:var(--ink-2);border:1px solid var(--line-2);cursor:pointer;text-decoration:none;white-space:nowrap}
+.chip.good{color:var(--good);border-color:color-mix(in srgb,var(--good) 45%,transparent);background:var(--good-soft)} .chip.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent);background:var(--bad-soft)} .chip.brand{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.chip small{opacity:.75;font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;padding:2px 8px;border-radius:var(--r2);white-space:nowrap;letter-spacing:.04em}
+.badge.good{background:var(--good);color:var(--on-good)} .badge.bad{background:var(--bad);color:var(--on-bad)} 
+.badge .t{font-weight:500}
+.badge.mid{background:var(--mid-soft);color:var(--mid)} .badge.brand{gap:0;background:transparent;color:var(--ink);border:1px solid var(--line-2);font-weight:500}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.dot.good{background:var(--good)} .dot.bad{background:var(--bad)} .dot.mid{background:var(--line-2)}
+
+/* ---------- 今日总览 ---------- */
+.hero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
+.daynum{font-family:var(--head);font-weight:700;font-size:58px;line-height:1;color:var(--ink);text-align:center;min-width:72px}
+.daynum small{display:block;font:500 12.5px/1.4 var(--sans);color:var(--muted);margin-top:6px}
+.lunar{font-family:var(--head);font-size:21px;font-weight:600;letter-spacing:.06em}
+.gz{font-family:var(--serif);color:var(--ink-2);font-size:15px}
+.hero .badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.verdict{margin-top:14px;border-radius:var(--r);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;font-size:15px;line-height:1.6}
+.verdict b{font-family:var(--serif);font-size:16px;white-space:nowrap}
+.verdict.good{background:var(--good-soft);color:var(--good)} .verdict.bad{background:var(--bad-soft);color:var(--bad)} .verdict.mid{background:var(--mid-soft);color:var(--ink-2)}
+.verdict span{color:var(--ink-2)}
+.yiji{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:16px}
+.yj{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:start}
+.stamp{width:44px;height:44px;border-radius:var(--r2);display:grid;place-items:center;font-family:var(--serif);font-size:22px;font-weight:700;color:#fff}
+.stamp.yi{background:var(--good);color:var(--on-good)} .stamp.ji{background:var(--bad);color:var(--on-bad)}
+.words{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:16px;line-height:1.75;padding-top:6px}
+.words .strong{color:var(--bad);font-weight:600}
+.yjnote{font-size:13px;color:var(--muted);margin-top:4px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:var(--ink-2)}
+.meta>span{white-space:nowrap}
+
+/* ---------- 今日对你 ---------- */
+.card.you{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));box-shadow:inset 3px 0 0 var(--accent)}
+.you-h{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.you-h h2{margin:0;font-family:var(--head);font-size:24px;font-weight:700;letter-spacing:.1em;line-height:1.25}
+.you-h .by{font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+.you-h .by b{font-family:var(--serif);font-weight:700;letter-spacing:.08em;white-space:nowrap}
+.mine-tag{display:inline-flex;align-items:center;font:600 12px/1 var(--sans);letter-spacing:.06em;color:var(--accent);background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);border-radius:var(--r2);padding:4px 7px;white-space:nowrap;vertical-align:middle}
+.mine-tag.lg{font-size:14px;padding:5px 10px;margin-left:4px}
+.intro{margin:0 0 14px;font-size:14.5px;line-height:1.75;color:var(--ink-2)}
+.intro b{color:var(--ink)}
+.you .title{font-family:var(--head);font-size:20px;font-weight:600;line-height:1.3}
+.you .title em{font-style:normal;color:var(--ink);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px}
+.stars{color:var(--now);letter-spacing:2px;font-size:18px;white-space:nowrap} .stars .off{color:var(--line-2)}
+.daytags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px}
+.dtag{font:700 15px/1.4 var(--sans);letter-spacing:.06em;padding:4px 12px;border-radius:var(--r2);border:0;cursor:pointer;text-decoration:none}
+.dtag.good{background:var(--good);color:var(--on-good)} .dtag.bad{background:var(--bad);color:var(--on-bad)} .dtag.mid{background:var(--mid-soft);color:var(--mid)}
+.summary{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin:12px 0 14px;font-size:15px;line-height:1.8}
+.summary b{color:var(--ink)}
+.summary p{margin:0}
+.sum-hours{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line-2);display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 10px;align-items:start;font-size:14.5px}
+.sum-hours .hrow{display:contents}
+.sum-hours .hl{font-size:12.5px;font-weight:700;padding:1px 8px;border-radius:var(--r2);white-space:nowrap;margin-top:2px;text-align:center}
+.sum-hours .hlist{display:flex;flex-wrap:wrap;gap:2px 14px}
+.sum-hours .hl.good{background:var(--good);color:var(--on-good)} .sum-hours .hl.bad{background:var(--bad);color:var(--on-bad)}
+.sum-hours .nw{white-space:nowrap}
+.facts{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.fact{display:grid;grid-template-columns:80px minmax(0,1fr);gap:10px;align-items:start;font-size:15px}
+.fact>.label{padding-top:5px}
+.sw-row{display:flex;flex-wrap:wrap;gap:6px 14px;padding-top:2px}
+.sw{display:inline-flex;align-items:center;gap:6px;font-size:15px;white-space:nowrap}
+.sw i{width:15px;height:15px;border-radius:50%;border:1px solid var(--line-2);display:inline-block;flex:none}
+.cta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px dashed var(--line-2)}
+.cta p{margin:0;color:var(--ink-2)}
+
+/* ---------- 详细资料（折叠） ---------- */
+.acc{padding:0;overflow:hidden}
+.acc>summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.08em;color:var(--ink)}
+.acc>summary::before{content:"";width:4px;height:19px;border-radius:2px;background:var(--accent);flex:none;margin-right:-2px}
+.acc>summary::-webkit-details-marker{display:none}
+.acc>summary .sub{font:13px var(--sans);color:var(--muted);margin-left:auto}
+.acc>summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s;margin-left:6px;flex:none}
+.acc[open]>summary::after{transform:rotate(-135deg)}
+.acc .acc-b{padding:0 18px 18px}
+.kv{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px 14px;margin:0;font-size:15px}
+.kv dt{color:var(--muted);font-size:14px;padding-top:2px} .kv dd{margin:0;min-width:0}
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar{display:grid;grid-template-columns:24px minmax(0,1fr) 30px;gap:12px;align-items:center;font-size:15px}
+.bar .el{font-family:var(--serif);font-weight:700}
+.bar .track{height:9px;background:var(--surface-2);border:1px solid var(--line);border-radius:5px;overflow:hidden} .bar .fill{height:100%}
+.bar .st{text-align:right;font-family:var(--serif);font-weight:600}
+.jg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.jg .c{border:1px solid var(--line);border-radius:var(--r);padding:8px 6px 10px;min-height:76px;background:var(--surface);text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px}
+.jg .c .d{font-family:var(--serif);font-size:15.5px;font-weight:700;color:var(--ink);letter-spacing:.08em;line-height:1.3}
+.jg .c.mid .d{font-size:12px;font-weight:400;color:var(--muted)}
+.jg .c .g{font-family:var(--serif);font-weight:700;font-size:15.5px;line-height:1.25}
+.jg .c.good{background:var(--good-soft);border-color:color-mix(in srgb,var(--good) 35%,transparent)}
+.jg .c.bad{background:var(--bad-soft);border-color:color-mix(in srgb,var(--bad) 35%,transparent)}
+.jg .c.mix{background:var(--surface-2)}
+.jg .c.empty{background:transparent;border-style:dashed}
+.jg .c.mid{justify-content:center;background:var(--surface-2)}
+.jg .c.mid b{font-family:var(--serif);font-size:20px}
+@media (min-width:640px){ .jg{max-width:420px;margin:0 auto} }
+.poem{font-family:var(--serif);font-size:14.5px;color:var(--ink-2);line-height:1.9}
+
+/* ---------- 时辰 ---------- */
+.legendline{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin-bottom:12px}
+.legendline span{display:inline-flex;align-items:center;gap:5px}
+.strip{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;margin-bottom:14px}
+.strip button{border:0;border-radius:var(--r2);padding:7px 0 5px;cursor:pointer;font-family:var(--serif);font-size:15px;font-weight:600;line-height:1.1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.strip button small{font:500 10.5px var(--sans);opacity:.8}
+.strip .good{background:var(--good-soft);color:var(--good)} .strip .bad{background:var(--bad-soft);color:var(--bad)} .strip .mid{background:var(--mid-soft);color:var(--mid)}
+.strip .now{outline:2px solid var(--now);outline-offset:1px}
+.plan{display:grid;gap:8px;padding:12px 14px;border-radius:var(--r);background:var(--surface-2);border:1px solid var(--line);margin-bottom:12px;font-size:14px}
+.plan .row{display:flex;gap:10px;align-items:baseline}
+.plan .row>div{display:flex;flex-wrap:wrap;gap:4px 12px}
+.plan .row b{font-family:var(--serif)}
+.hr{border-top:1px solid var(--line)} .hr:first-child{border-top:0}
+.hr-head{width:100%;border:0;background:transparent;cursor:pointer;display:grid;grid-template-columns:78px minmax(0,1fr) auto 16px;gap:10px;align-items:center;padding:12px 4px;text-align:left}
+.hr-head .nm b{font-family:var(--serif);font-size:17px;font-weight:600;display:block;line-height:1.2}
+.hr-head .nm span{font-size:12.5px;color:var(--muted)}
+.hr-head .mid-col{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0}
+.hr-head .chev{width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s;justify-self:center}
+.hr.open .chev{transform:rotate(-135deg)}
+.hr.now{background:var(--now-soft);border-radius:var(--r2);border-top-color:transparent}
+.hr.now + .hr{border-top-color:transparent}
+.nowtag{font:600 11px var(--sans);color:var(--now);margin-left:4px}
+.hr-body{padding:2px 6px 16px;display:grid;gap:10px;font-size:14.5px}
+.hr-body .kv{grid-template-columns:52px minmax(0,1fr);font-size:14.5px}
+.mine{background:var(--surface);border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));box-shadow:inset 3px 0 0 var(--accent);border-radius:var(--r);padding:10px 12px 10px 15px}
+.mine .who{font:600 14.5px/1.4 var(--sans);color:var(--accent);letter-spacing:.06em}
+.mine .top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+
+/* ---------- 命盘 ---------- */
+.form{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.selrow{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px} .selrow.two{grid-template-columns:1.6fr 1fr}
+.field select{width:100%;height:46px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface);padding:0 10px;font-size:16px}
+.form .actions{display:flex;gap:8px} .form .actions .btn{height:46px;flex:1}
+.formerr{color:var(--bad);font-size:14px;margin-top:10px}
+.pillars-wrap{overflow-x:auto}
+.pillars{width:100%;border-collapse:collapse;text-align:center;min-width:300px}
+.pillars th{font-size:12.5px;color:var(--muted);font-weight:500;padding:8px 4px;border-bottom:1px solid var(--line)}
+.pillars th.row{text-align:left;width:46px}
+.pillars td{padding:8px 4px;border-bottom:1px solid var(--line);font-size:14px;color:var(--ink-2)}
+.pillars tr:last-child td,.pillars tr:last-child th{border-bottom:0}
+.pillars .big{font-family:var(--serif);font-size:28px;font-weight:700;line-height:1.2}
+.pillars .day{background:var(--surface-2)}
+.pillars .ss{display:block;font-size:11.5px;color:var(--muted)}
+.info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
+.info .v{font-size:15.5px;color:var(--ink);margin-top:2px}
+@media (min-width:640px){ .info{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.kong{display:inline-block;margin-left:2px;font-size:11px;font-weight:700;color:var(--bad);border:1px solid color-mix(in srgb,var(--bad) 45%,transparent);border-radius:3px;padding:0 3px;vertical-align:top}
+.sharow td{vertical-align:top}
+.shacol{display:flex;flex-direction:column;align-items:center;gap:4px}
+.shacol .chip{font-size:12.5px;padding:2px 6px}
+.relh{font-family:var(--serif);font-weight:700;font-size:15.5px;color:var(--ink);margin:16px 0 8px}
+.bars.ss .bar{grid-template-columns:42px minmax(0,1fr) 38px}
+.bars.ss .el{font-size:14px;font-weight:600}
+.dygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px}
+.dy{display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 2px;border:1px solid var(--line);border-radius:var(--r2);background:var(--surface);cursor:pointer;font:inherit;font-size:12px;color:var(--ink-2);line-height:1.5}
+.dy b{font-family:var(--serif);font-size:17px;font-weight:700}
+.dy.cur{border-color:var(--accent)} .dy.sel{background:var(--accent-soft);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.lngrid,.lygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px}
+.lngrid div,.lygrid div{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 2px;border:1px solid var(--line);border-radius:var(--r2);font-size:12px;color:var(--ink-2);line-height:1.5}
+.lngrid b,.lygrid b{font-family:var(--serif);font-size:16px;font-weight:700}
+.lngrid .cur{border-color:var(--accent);background:var(--accent-soft)}
+.lygrid .mn{font-weight:600;color:var(--ink)}
+.lygrid .tag{font-size:11px;font-weight:700;padding:0 5px;border-radius:3px}
+.lygrid .tag.bad{background:var(--bad-soft);color:var(--bad)} .lygrid .tag.good{background:var(--good-soft);color:var(--good)}
+.ynav{display:inline-flex;align-items:center;gap:6px;font-family:var(--serif);font-size:16px;font-weight:700;color:var(--ink)}
+.iconbtn.sm{width:30px;height:30px;font-size:16px}
+.dayun{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
+.dayun div{border:1px solid var(--line);border-radius:var(--r2);padding:8px 2px;text-align:center;font-size:12px;color:var(--muted);line-height:1.5}
+.dayun div b{display:block;font-family:var(--serif);font-size:16px;color:var(--ink);font-weight:600}
+.dayun div.cur{border-color:var(--accent);background:var(--accent-soft)} .dayun div.cur b{color:var(--accent)}
+.empty{text-align:center;padding:36px 18px;color:var(--muted)}
+
+/* ---------- 底部导航（手机） ---------- */
+.bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:25;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom)}
+.bottomnav button{border:0;background:transparent;height:var(--nav-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12.5px;color:var(--muted);cursor:pointer}
+.bottomnav button svg{width:22px;height:22px}
+.bottomnav button[aria-selected="true"]{color:var(--accent);font-weight:700}
+
+/* ---------- 名词解释（手机：底部弹出；电脑：中间小窗） ---------- */
+.sheet-back{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.35)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--surface);border-radius:16px 16px 0 0;padding:10px 20px calc(22px + env(safe-area-inset-bottom));max-height:70vh;overflow:auto;box-shadow:0 -8px 30px rgba(0,0,0,.15)}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--line-2);margin:0 auto 12px}
+.sheet h3{margin:0 0 4px;font-family:var(--serif);font-size:24px}
+.sheet .entry{padding:12px 0;border-top:1px solid var(--line)} .sheet .entry:first-of-type{border-top:0}
+.sheet .entry .cat{font-size:12px;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:var(--r2)}
+.sheet .entry p{margin:8px 0 0;font-size:15.5px;line-height:1.75}
+.sheet .entry .use{color:var(--ink-2);font-size:14.5px}
+.sheet .close{position:absolute;top:10px;right:12px}
+.sheet s.clash{color:var(--muted);text-decoration-thickness:2px}
+.sheet .ctxnote{margin-top:10px;padding:10px 12px;border-radius:var(--r2);background:var(--accent-soft);font-size:14px;line-height:1.7;color:var(--ink-2)}
+.sheet .ctxnote b{color:var(--ink)}
+
+/* ---------- 日历 ---------- */
+.cal{position:fixed;left:50%;top:calc(var(--top-h) + 64px);transform:translateX(-50%);z-index:31;width:min(360px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);box-shadow:0 12px 40px rgba(0,0,0,.16);padding:14px}
 .cal-h{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px}
 .cal-h .sel{display:flex;gap:6px}
-.cal-h select{height:34px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);padding:0 8px;font-family:var(--serif);font-size:15px;font-weight:600}
-.cal-h .iconbtn{width:34px;height:34px}
+.cal-h select{height:36px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);padding:0 8px;font-family:var(--serif);font-size:15px;font-weight:600}
 .cal-w,.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .cal-w span{text-align:center;font-size:12px;color:var(--muted);padding:4px 0}
-.cal-w span:first-child,.cal-w span:last-child{color:var(--accent)}
-.cal-g button{border:0;background:transparent;border-radius:8px;padding:5px 0 4px;cursor:pointer;line-height:1.2;min-height:44px}
+.cal-g button{border:0;background:transparent;border-radius:8px;padding:5px 0 4px;cursor:pointer;line-height:1.2;min-height:46px}
 .cal-g button b{display:block;font-family:var(--serif);font-size:16px;font-weight:600}
 .cal-g button small{display:block;font-size:10.5px;color:var(--muted);margin-top:2px;white-space:nowrap}
 .cal-g button small.jq{color:var(--accent)}
 .cal-g button:hover{background:var(--surface-2)}
 .cal-g button.today{box-shadow:inset 0 0 0 1px var(--accent)}
-.cal-g button.sel{background:var(--accent);color:#fff}
-.cal-g button.sel small{color:rgba(255,255,255,.85)}
-.cal-f{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
-.cal-back{position:fixed;inset:0;z-index:29;background:rgba(0,0,0,.28)}
-@media (min-width:641px){.cal-back{background:transparent}}
-.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.ghost{background:transparent}
-.btn.on{border-color:var(--accent);color:var(--accent)}
+.cal-g button.sel{background:var(--accent);color:#fff} .cal-g button.sel small{color:rgba(255,255,255,.85)}
+.cal-f{display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.cal-back{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.28)}
 
-/* ---------- cards ---------- */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;position:relative}
-.stack{display:flex;flex-direction:column;gap:16px}
-.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 16px}
-.sec-h h3{margin:0;font-family:var(--serif);font-size:17px;font-weight:600;letter-spacing:.06em}
-.sec-h .sub{font-size:12.5px;color:var(--muted)}
-.section-title{font-family:var(--serif);font-size:13px;letter-spacing:.3em;color:var(--muted);margin:32px 0 12px;display:flex;align-items:center;gap:12px}
-.section-title::after{content:"";flex:1;height:1px;background:var(--line)}
+footer{margin:28px 0 20px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:10px}
+footer .tools{display:flex;gap:8px;flex-wrap:wrap} footer .btn{font-size:13px;padding:6px 12px}
+.chk{font-size:12px;padding:2px 10px;border-radius:var(--r2);border:1px solid var(--line-2);background:var(--surface);cursor:pointer;color:var(--muted)}
+.chk.ok{background:var(--good);border-color:var(--good);color:#fff} .chk.bad{background:var(--bad);border-color:var(--bad);color:#fff}
 
-/* ---------- hero ---------- */
-.hero{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;padding-bottom:22px;border-bottom:1px solid var(--line)}
-.dayblock{text-align:center;padding-right:28px;border-right:1px solid var(--line)}
-.dayblock .num{font-family:var(--serif);font-size:76px;line-height:1;font-weight:700;color:var(--accent)}
-.dayblock .ym{font-size:13px;color:var(--muted);margin-top:8px;letter-spacing:.05em}
-.lunar{font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:.08em}
-.gz{font-family:var(--serif);font-size:16px;color:var(--ink-2);margin-top:2px;letter-spacing:.05em}
-.meta{display:flex;flex-wrap:wrap;gap:6px 0;margin-top:12px;font-size:13.5px;color:var(--ink-2)}
-.meta span:not(:last-child)::after{content:"·";margin:0 10px;color:var(--line-2)}
-.meta .hl{color:var(--accent);font-weight:500}
-.meta .ok{color:var(--good);font-weight:500}
-.yiji{display:grid;grid-template-columns:1fr 1fr;gap:28px;padding-top:22px}
-.yj{display:flex;gap:14px;align-items:flex-start}
-.stamp{flex:none;width:40px;height:40px;border-radius:6px;display:grid;place-items:center;font-family:var(--serif);font-size:21px;font-weight:700;color:#fff}
-.stamp.yi{background:var(--good)} .stamp.ji{background:var(--bad)}
-.words{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:15.5px;line-height:1.8;padding-top:5px}
-.words .strong{color:var(--bad);font-weight:600}
-.yjnote{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.6}
-.alert{margin-top:18px;padding:10px 14px;border-radius:8px;background:var(--bad-soft);color:var(--bad);font-size:14px;line-height:1.7}
-.alert b{font-family:var(--serif);font-weight:700;margin-right:6px}
+@media (max-width:639px){ .verdict{flex-direction:column;gap:2px} }
+/* ---------- 手机：分页显示 ---------- */
+body[data-tab="today"] #colSide, body[data-tab="hours"] #colMain{display:none}
+body[data-tab="me"] #viewToday, body:not([data-tab="me"]) #viewMe{display:none}
+body[data-tab="me"] #datebar{display:none}
+body[data-tab="pick"] #viewToday, body:not([data-tab="pick"]) #viewPick, body[data-tab="pick"] #datebar{display:none}
 
-/* ---------- tags & lists ---------- */
-.tags{display:flex;flex-wrap:wrap;gap:6px}
-.tag{font-size:13px;line-height:1.5;padding:2px 9px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
-.tag.good{background:var(--good-soft);border-color:transparent;color:var(--good)}
-.tag.bad{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
-.tag.gold{background:var(--gold-soft);border-color:transparent;color:var(--gold)}
-.kv{display:grid;grid-template-columns:84px 1fr;gap:10px 16px;margin:0;font-size:14.5px}
-.kv dt{color:var(--muted);font-size:13.5px;padding-top:1px}
-.kv dd{margin:0;min-width:0}
-.note{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:14px}
-.poem{font-family:var(--serif);font-size:14px;color:var(--ink-2);line-height:1.9}
+/* ---------- 择日 ---------- */
+.pick-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:14px}
+.pk-sec{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line-2)} .pk-sec.first{margin-top:0;padding-top:0;border-top:0}
+.pk-h{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;margin:0 0 12px;font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink);letter-spacing:.04em}
+.pk-h .n{width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--seal-ink);font:700 12.5px/22px var(--sans);text-align:center;flex:none;letter-spacing:0}
+.pk-h small{font:400 12.5px var(--sans);color:var(--muted);letter-spacing:0}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opt{font-size:14.5px;line-height:1.4;padding:6px 11px;border-radius:var(--r2);border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.opt[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--seal-ink);font-weight:600}
+.more-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-top:10px;padding:11px 14px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface);color:var(--ink-2);font:inherit;font-size:15px;cursor:pointer;text-align:left}
+.more-btn .chev{width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s;flex:none}
+.more-btn[aria-expanded="true"] .chev{transform:rotate(-135deg)}
+.more-panel{margin-top:8px;padding:4px 14px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2)}
+.more-g{padding-top:12px}
+.more-h{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink);letter-spacing:.06em}
+.more-h::before{content:"";width:4px;height:17px;border-radius:2px;background:var(--accent);flex:none}
+.opt small{font-size:12px;opacity:.75}
+.pk-range{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;align-items:center;margin-bottom:6px}
+.pk-sub{font-size:12.5px;color:var(--muted);margin:2px 0 6px} .opts+.pk-sub,.avl+.pk-sub{margin-top:12px}
+.avl{display:grid;gap:6px}
+.avi{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;padding:9px 12px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface);cursor:pointer;color:inherit;font:inherit}
+.avi .box{width:18px;height:18px;border:1.5px solid var(--line-2);border-radius:4px;display:grid;place-items:center;background:var(--surface)}
+.avi[aria-pressed="true"]{border-color:color-mix(in srgb,var(--accent) 55%,transparent);background:var(--accent-soft)}
+.avi[aria-pressed="true"] .box{background:var(--accent);border-color:var(--accent)}
+.avi[aria-pressed="true"] .box::after{content:"";width:4px;height:8px;border:solid var(--seal-ink);border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.avt b{display:block;font-size:15px;font-weight:600;line-height:1.4}
+.avt small{display:block;font-size:12.5px;color:var(--muted);line-height:1.5}
+.avn{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.avi[aria-pressed="true"] .avn{color:var(--accent);font-weight:600}
+.cat{font-size:15px;font-weight:600;line-height:1.4;padding:6px 13px;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.cat[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.evbox{margin-top:10px;padding:12px;border-radius:var(--r);background:var(--surface-2);border:1px solid var(--line)}
+.opt.sq{min-width:42px;text-align:center;font-family:var(--serif);font-size:15.5px}
+.pk-month{font-family:var(--serif);font-weight:600;color:var(--muted);font-size:14px;letter-spacing:.06em;margin:16px 0 2px}
+.pk-row{display:grid;grid-template-columns:80px minmax(0,1fr);grid-template-areas:"d m" "s m";gap:2px 12px;align-items:start;width:100%;text-align:left;background:transparent;border:0;border-top:1px solid var(--line);padding:12px 4px;cursor:pointer;color:inherit;font:inherit}
+.pk-row:hover{background:var(--surface-2)}
+.pk-date b{display:block;font-family:var(--serif);font-size:16.5px;line-height:1.3;white-space:nowrap}
+.pk-l1 .nw{white-space:nowrap}
+.pk-date span{font-size:12.5px;color:var(--muted)} .pk-date.we span{color:var(--accent);font-weight:600}
+.pk-l1{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:14.5px;color:var(--ink-2)}
+.pk-l2{display:block;font-size:13px;color:var(--muted);margin-top:5px;line-height:1.6;word-break:keep-all}
+.pk-date{grid-area:d} .pk-main{grid-area:m} .pk-side{grid-area:s}
+.pk-side .stars{font-size:12.5px;letter-spacing:1px}
+@media (min-width:640px){ .pk-row{grid-template-columns:80px minmax(0,1fr) auto;grid-template-areas:"d m s";align-items:center;gap:12px} .pk-side .stars{font-size:14px} }
+.pk-empty{color:var(--muted);padding:14px 0 4px;line-height:1.7}
+.pk-sort{display:flex;gap:6px;margin:-4px 0 6px}
 
-/* ---------- 五行 bars ---------- */
-.bars{display:flex;flex-direction:column;gap:10px}
-.bar{display:grid;grid-template-columns:22px 1fr 26px;gap:12px;align-items:center;font-size:14px}
-.bar .el{font-family:var(--serif);font-weight:700}
-.bar .track{height:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;overflow:hidden}
-.bar .fill{height:100%}
-.bar .st{text-align:right;font-family:var(--serif);font-weight:600}
-
-/* ---------- compass ---------- */
-.compass{display:flex;justify-content:center}
-.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:4px 12px;font-size:13px;margin-top:8px}
-.legend span{color:var(--muted)} .legend b{font-weight:500;color:var(--ink)}
-
-/* ---------- personal today ---------- */
-.you{border-left:3px solid var(--accent)}
-.you .head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.you .title{font-family:var(--serif);font-size:24px;font-weight:600;letter-spacing:.04em}
-.you .title em{font-style:normal;color:var(--accent)}
-.stars{color:var(--gold);letter-spacing:3px;font-size:16px}
-.stars .off{color:var(--line-2)}
-.you .desc{color:var(--ink-2);margin-top:4px}
-.summary{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:16px 0 20px;font-size:15px;line-height:1.85}
-.summary b{color:var(--accent);font-weight:600}
-.shalist{margin:8px 0 0;padding:0;list-style:none;font-size:13.5px;color:var(--ink-2)}
-.shalist li{padding:2px 0} .shalist li b{font-weight:600;color:var(--ink)}
-.prompt{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:var(--surface-2);border-style:dashed}
-.prompt p{margin:0;color:var(--ink-2)}
-
-/* ---------- hours ---------- */
-.hours{display:flex;flex-direction:column}
-.hour{display:grid;grid-template-columns:92px 74px minmax(0,1.1fr) minmax(0,1.6fr) 128px;gap:16px;padding:14px 8px;border-top:1px solid var(--line);font-size:13.5px;align-items:start}
-.hour:first-child{border-top:0}
-.hour.now{background:var(--gold-soft);border-radius:8px;border-color:transparent}
-.hour.now + .hour{border-color:transparent}
-.hour .t b{font-family:var(--serif);font-size:16px;font-weight:600;display:block}
-.hour .t span{color:var(--muted);font-size:12.5px}
-.hour .t .nowtag{color:var(--gold);font-weight:600}
-.luck{font-family:var(--serif);font-weight:600;font-size:14px}
-.luck.good{color:var(--good)} .luck.bad{color:var(--bad)}
-.luck small{display:block;font-family:var(--sans);font-weight:400;color:var(--muted);font-size:12px}
-.hour .yj-line{line-height:1.7;color:var(--ink-2)}
-.hour .yj-line i{font-style:normal;font-family:var(--serif);font-weight:700;margin-right:6px}
-.hour .yj-line i.y{color:var(--good)} .hour .yj-line i.j{color:var(--bad)}
-.hour .side{color:var(--muted);font-size:12.5px;line-height:1.7}
-.hour .side b{color:var(--ink-2);font-weight:500}
-.hour .tags{gap:4px} .hour .tag{font-size:12px;padding:1px 7px}
-.hour .mine{grid-column:3/-1;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13px;color:var(--ink-2)}
-.hour .mine b{font-family:var(--serif);font-weight:600;color:var(--ink)}
-.hour.p-good{box-shadow:inset 3px 0 0 var(--good)}
-.hour.p-bad{box-shadow:inset 3px 0 0 var(--bad)}
-.lvl{display:inline-block;font-family:var(--serif);font-weight:700;font-size:12.5px;line-height:1.6;padding:0 8px;border-radius:4px;white-space:nowrap}
-.lvl.good{background:var(--good);color:#fff} .lvl.bad{background:var(--bad);color:#fff} .lvl.mid{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
-.hplan{display:grid;gap:10px;padding:14px 8px 16px;margin-bottom:4px;border-bottom:1px solid var(--line)}
-.hplan .row{display:flex;gap:12px;align-items:baseline}
-.hplan .row > div{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14px}
-.hplan .row b{font-family:var(--serif);font-weight:600}
-.hplan .row small{color:var(--muted);font-size:12.5px}
-.hplan .cap{font-size:12.5px;color:var(--muted)}
-
-/* ---------- natal ---------- */
-.form{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1.5fr) minmax(0,.9fr) auto;gap:14px;align-items:end}
-.selrow{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px}
-.selrow.two{grid-template-columns:1.6fr 1fr}
-.formerr{color:var(--bad);font-size:13px;margin-top:10px}
-.field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px}
-.field input,.field select{width:100%;height:40px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);padding:0 12px}
-.field input:focus,.field select:focus{outline:2px solid color-mix(in srgb,var(--accent) 35%,transparent);border-color:var(--accent)}
-.form .actions{display:flex;gap:8px}
-.form .actions .btn{height:40px}
-.pillars{width:100%;border-collapse:collapse;text-align:center}
-.pillars th{font-size:12.5px;color:var(--muted);font-weight:500;padding:8px 4px;border-bottom:1px solid var(--line)}
-.pillars th.row{text-align:left;width:52px}
-.pillars td{padding:8px 4px;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink-2)}
-.pillars tr:last-child td,.pillars tr:last-child th{border-bottom:0}
-.pillars .big{font-family:var(--serif);font-size:30px;font-weight:700;line-height:1.2}
-.pillars .day{background:var(--accent-soft)}
-.pillars .ss{display:block;font-size:11.5px;color:var(--muted)}
-.dayun{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:6px}
-.dayun div{border:1px solid var(--line);border-radius:6px;padding:8px 2px;text-align:center;font-size:12px;color:var(--muted);line-height:1.5}
-.dayun div b{display:block;font-family:var(--serif);font-size:16px;color:var(--ink);font-weight:600}
-.dayun div.cur{border-color:var(--accent);background:var(--accent-soft)}
-.dayun div.cur b{color:var(--accent)}
-.empty{text-align:center;padding:48px 24px;color:var(--muted)}
-.empty .serif{font-size:20px;color:var(--ink);margin-bottom:6px}
-
-/* ---------- compare & footer ---------- */
-.chk{font-size:12px;padding:2px 10px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;color:var(--muted)}
-.chk.ok{background:var(--good);border-color:var(--good);color:#fff}
-.chk.bad{background:var(--bad);border-color:var(--bad);color:#fff}
-.chk.abs{position:absolute;top:16px;right:16px}
-footer{margin:40px 0 32px;padding-top:20px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
-footer .tools{display:flex;gap:8px;flex-wrap:wrap}
-footer .btn{font-size:12.5px;padding:4px 12px}
-[hidden]{display:none!important}
-
-/* ---------- responsive ---------- */
-@media (max-width:860px){
-  .hour{grid-template-columns:84px 64px minmax(0,1fr);}
-  .hour .yj-line{grid-column:1/-1}
-  .hour .side{grid-column:1/-1;display:flex;gap:16px}
-  .hour .mine{grid-column:1/-1}
-  .form{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .form .actions{grid-column:1/-1}
-  .dayun{grid-template-columns:repeat(5,minmax(0,1fr))}
+/* ---------- 平板以上 ---------- */
+@media (min-width:640px){
+  .card{padding:22px}
+  .yiji{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 22px}
+  .form{grid-template-columns:minmax(0,1.6fr) minmax(0,1.3fr) minmax(0,.9fr);align-items:end}
+  .form .actions{grid-column:1/-1;justify-content:flex-end} .form .actions .btn{flex:none;padding:0 22px}
+  .daynum{font-size:68px}
+  .pillars .big{font-size:32px}
 }
-@media (max-width:640px){
-  .form{grid-template-columns:minmax(0,1fr)}
-  .cal{position:fixed;left:50%;top:76px;transform:translateX(-50%);width:min(360px,calc(100vw - 24px))}
-  .wrap{padding:0 16px}
-  .topbar .wrap{height:54px}
-  .brand{font-size:17px} .seal{width:26px;height:26px;font-size:13px}
-  .tabs button{padding:4px 12px;font-size:13px}
-  .card{padding:18px}
-  .grid2{grid-template-columns:minmax(0,1fr)}
-  .hero{grid-template-columns:minmax(0,1fr);gap:14px}
-  .dayblock{display:flex;align-items:baseline;gap:12px;text-align:left;border-right:0;padding-right:0}
-  .dayblock .num{font-size:56px}
-  .dayblock .ym{margin-top:0}
-  .lunar{font-size:22px}
-  .yiji{grid-template-columns:minmax(0,1fr);gap:16px}
-  .you .title{font-size:20px}
-  .pillars .big{font-size:24px}
-  .kv{grid-template-columns:72px 1fr}
+
+/* ---------- 电脑：两栏，时辰固定在右边；底部导航隐藏，用顶部分页 ---------- */
+@media (min-width:1024px){
+  body{padding-bottom:0}
+  .bottomnav{display:none}
+  .toptabs{display:flex}
+  .wrap{padding:0 28px}
+  .today-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(360px,1fr);gap:22px;align-items:start}
+  body[data-tab="today"] #colSide, body[data-tab="hours"] #colMain{display:block}
+  .col-side{position:sticky;top:calc(var(--top-h) + 14px);max-height:calc(100vh - var(--top-h) - 28px);overflow:auto;border-radius:var(--r)}
+  .datebar{margin:20px 0 18px}
+  .datewrap{justify-content:flex-start}
+  .datepick{font-size:20px}
+  .sheet-back{background:rgba(0,0,0,.25)}
+  .sheet{left:50%;right:auto;bottom:auto;top:50%;transform:translate(-50%,-50%);width:440px;border-radius:var(--r);max-height:80vh;padding:18px 24px 22px}
+  .sheet .grab{display:none}
+  .cal{position:absolute;left:0;top:calc(100% + 8px);transform:none}
+  .cal-back{background:transparent}
+  footer{flex-direction:row;justify-content:space-between;align-items:center}
+  .pick-grid{grid-template-columns:400px minmax(0,1fr);align-items:start}
+  #natal{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+  #natal .span2{grid-column:1 / -1}
+  .pick-grid>.card:first-child{position:sticky;top:calc(var(--top-h) + 14px);max-height:calc(100vh - var(--top-h) - 28px);overflow:auto}
 }
 </style>
 </head>
-<body>
+<body data-tab="today">
 <header class="topbar">
   <div class="wrap">
     <div class="brand"><span class="seal">胜</span>每日通胜</div>
-    <nav class="tabs" role="tablist">
-      <button role="tab" data-tab="today" aria-selected="true">今日通胜</button>
-      <button role="tab" data-tab="me" aria-selected="false">我的命盘</button>
-    </nav>
+    <div class="topright">
+      <nav class="toptabs" role="tablist" aria-label="分页">
+        <button role="tab" data-tab="today" aria-selected="true">今日通胜</button>
+        <button role="tab" data-tab="pick" aria-selected="false">择日</button>
+        <button role="tab" data-tab="me" aria-selected="false">我的命盘</button>
+      </nav>
+      <button class="themebtn" id="themeBtn" aria-label="切换深色／浅色"></button>
+    </div>
   </div>
 </header>
 
@@ -278,401 +409,690 @@ footer .btn{font-size:12.5px;padding:4px 12px}
     <div class="nav">
       <button class="iconbtn" id="prev" aria-label="前一日">‹</button>
       <div class="datewrap">
-        <button type="button" class="datepick" id="datePick" title="选择日期" aria-haspopup="dialog" aria-expanded="false"><span id="dateLabel"></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
+        <button type="button" class="datepick" id="datePick" aria-haspopup="dialog" aria-expanded="false"><span id="dateLabel"></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
         <div class="cal-back" id="calBack" hidden></div>
         <div class="cal" id="cal" hidden role="dialog" aria-label="选择日期"></div>
       </div>
       <button class="iconbtn" id="next" aria-label="后一日">›</button>
     </div>
-    <button class="btn ghost" id="today">回到今天</button>
+    <button class="btn" id="today">今天</button>
   </div>
 
-  <main id="viewToday" class="stack"></main>
+  <div id="viewToday" class="today-grid">
+    <div id="colMain" class="stack"></div>
+    <aside id="colSide" class="col-side"></aside>
+  </div>
 
-  <main id="viewMe" class="stack" hidden style="margin-top:24px">
+  <div id="viewPick" class="pick-grid"></div>
+
+  <div id="viewMe" class="stack" style="margin-top:14px">
     <section class="card">
-      <div class="sec-h"><h3>输入生辰</h3><span class="sub">只保存在你自己的设备上</span></div>
+      <div class="card-h"><h2>输入生辰</h2><span class="sub">只保存在你自己的设备上</span></div>
       <form class="form" id="meForm">
         <div class="field"><label for="meY">出生日期（公历）</label><div class="selrow"><select id="meY" aria-label="年"></select><select id="meM" aria-label="月"></select><select id="meD" aria-label="日"></select></div></div>
-        <div class="field"><label for="meH">出生时间</label><div class="selrow two"><select id="meH" aria-label="时"></select><select id="meMin" aria-label="分"></select></div></div>
-        <div class="field"><label for="meGender">性别（用于大运）</label>
-          <select id="meGender"><option value="">不填</option><option value="m">男</option><option value="f">女</option></select></div>
-        <div class="actions"><button class="btn primary" type="submit">排盘</button><button class="btn" type="button" id="meClear">清除</button></div>
+        <div class="field"><label for="meH">出生时间（钟表时间）</label><div class="selrow two"><select id="meH" aria-label="时"></select><select id="meMin" aria-label="分"></select></div></div>
+        <div class="field"><label for="meGender">性别（用于大运）</label><select id="meGender"><option value="">不填</option><option value="m">男</option><option value="f">女</option></select></div>
+        <div class="actions"><button class="btn" type="button" id="meClear">清除</button><button class="btn primary" type="submit">排盘</button></div>
       </form>
       <div class="formerr" id="meErr" hidden></div>
     </section>
     <div id="natal" class="stack"></div>
-  </main>
+  </div>
 
   <footer>
-    <span>依《协纪辨方书》规则推算（lunar-javascript）；当旺五行、个人神煞依传统规则计算；喜用依扶抑与调候推定。所有计算在你的浏览器内完成，资料不会上传。</span>
-    <span class="tools">
-      <button class="btn ghost" id="cmp">对比模式</button>
-      <button class="btn ghost" id="export">导出对比记录</button>
-      <button class="btn ghost" id="clear">清除记录</button>
-    </span>
+    <span class="tools"><button class="btn ghost" id="cmp">对比模式</button><button class="btn ghost" id="export">导出对比记录</button><button class="btn ghost" id="clear">清除记录</button></span>
   </footer>
 </div>
+
+<nav class="bottomnav" aria-label="分页">
+  <button data-tab="today" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="12" cy="15" r="1.6" fill="currentColor"/></svg>今日</button>
+  <button data-tab="hours" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>时辰</button>
+  <button data-tab="pick" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6 7.5V18l-4 2v-7.5z"/></svg>择日</button>
+  <button data-tab="me" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>命盘</button>
+</nav>
+
+<div class="sheet-back" id="sheetBack" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle"></div>
 
 <script>
 const WX = ['木','火','土','金','水'];
 const WX_COLOR = {木:'var(--wood)',火:'var(--fire)',土:'var(--earth)',金:'var(--metal)',水:'var(--water)'};
 const SI_LI = {'立春':'木','立夏':'火','立秋':'金','立冬':'水'};
-const DIRS = ['正北','东北','正东','东南','正南','西南','正西','西北']; // clockwise from N
+const DIRS = ['正北','东北','正东','东南','正南','西南','正西','西北'];
 const DIR_ALIAS = {'北':'正北','东':'正东','南':'正南','西':'正西'};
 const WEEK = ['日','一','二','三','四','五','六'];
 const BAD_SHA = ['羊刃','劫煞','亡神','空亡'];
+const BAD_SHA_PLAIN = {羊刃:'容易冲动、受伤', 劫煞:'防小人、破财', 亡神:'容易分心出错', 空亡:'事情容易落空、拖延'};
 const $ = id => document.getElementById(id);
+const isDesktop = () => matchMedia('(min-width:1024px)').matches;
 
 let cur = new Date(); cur.setHours(12,0,0,0);
-let cmpMode = false;
-let tab = 'today';
-const store = {
-  get(){ try{ return JSON.parse(localStorage.getItem('ts-check')||'{}'); }catch(e){ return {}; } },
-  set(v){ try{ localStorage.setItem('ts-check', JSON.stringify(v)); }catch(e){} }
-};
-
+let cmpMode = false, tab = 'today', openHour = null;
+const store = { get(){ try{ return JSON.parse(localStorage.getItem('ts-check')||'{}'); }catch(e){ return {}; } }, set(v){ try{ localStorage.setItem('ts-check', JSON.stringify(v)); }catch(e){} } };
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const toDate = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d,12); };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const tags = (arr, cls) => arr.map(x => `<span class="tag ${cls}">${esc(x)}</span>`).join('');
 
-// 当旺五行：四立定季节，四立前18日为土旺用事
+// 可点击名词：t(显示文字, 词条) ；chip(显示文字, 词条, 吉凶)
+const has = k => !!(window.GLOSS && GLOSS[k]);
+const t = (label, key = label, cat = '') => has(key) ? `<button class="t" data-t="${esc(key)}"${cat ? ` data-c="${cat}"` : ''}>${esc(label)}</button>` : esc(label);
+const chip = (label, key = label, cls = '', cat = '') => `<button class="chip ${cls}" ${has(key) ? `data-t="${esc(key)}"${cat ? ` data-c="${cat}"` : ''}` : 'disabled'}>${label}</button>`;
+// 与本命的关系用白话讲：按生活方面（年＝长辈、月＝工作父母、日＝自己伴侣、时＝子女下属）＋影响
+const AREA_S = ['长辈','工作和父母','自己和伴侣','子女和下属'];
+// 影响由重到轻；同一方面最多讲两个，重的已包含轻的（大变动包含冲突、意见不合；冲突包含意见不合）
+const REL_EFF = [[r => /^反吟/.test(r.t), '大变动'], [r => r.t === '冲', '冲突'], [r => r.t === '伏吟', '停滞'], [r => r.t === '刑', '摩擦'], [r => r.t === '害', '误会'], [r => /^天干.*冲$/.test(r.t), '意见不合'], [r => r.t === '破', '小波折']];
+const relEffs = bad => { let e = REL_EFF.filter(([f]) => bad.some(f)).map(x => x[1]);
+  if (e.includes('大变动')) e = e.filter(x => x !== '冲突' && x !== '意见不合'); else if (e.includes('冲突')) e = e.filter(x => x !== '意见不合');
+  return e.slice(0, 2); };
+const relTop = bad => { const f = REL_EFF.find(([g]) => bad.some(g)); return f ? bad.find(f[0]) : bad[0]; };   // 弹窗解释最重的那个关系
+const relKey = r => /伏吟/.test(r) ? '伏吟' : /反吟/.test(r) ? '反吟' : /天干.*合/.test(r) ? '天干合' : /天干.*冲/.test(r) ? '天干冲' : r;
+
 function wangXiang(date){
   const pts = [];
-  for (const off of [-200, 0, 200]) {
-    const d = new Date(date); d.setDate(d.getDate()+off);
-    const tbl = Solar.fromDate(d).getLunar().getJieQiTable();
-    for (const [k,v] of Object.entries(tbl)) if (SI_LI[k]) pts.push({name:k, ymd:v.toYmd()});
-  }
+  for (const off of [-200, 0, 200]) { const d = new Date(date); d.setDate(d.getDate()+off); const tbl = Solar.fromDate(d).getLunar().getJieQiTable(); for (const [k,v] of Object.entries(tbl)) if (SI_LI[k]) pts.push({name:k, ymd:v.toYmd()}); }
   const uniq = [...new Map(pts.map(p => [p.ymd,p])).values()].sort((a,b)=>a.ymd<b.ymd?-1:1);
-  const today = ymd(date);
-  const prev = uniq.filter(p => p.ymd <= today).pop();
-  const next = uniq.find(p => p.ymd > today);
-  const daysToNext = Math.round((toDate(next.ymd) - toDate(today)) / 864e5);
-  const tuWang = daysToNext <= 18;
-  const wang = tuWang ? '土' : SI_LI[prev.name];
-  const i = WX.indexOf(wang);
-  const state = {};
-  state[WX[i]] = '旺'; state[WX[(i+1)%5]] = '相'; state[WX[(i+4)%5]] = '休';
-  state[WX[(i+3)%5]] = '囚'; state[WX[(i+2)%5]] = '死';
+  const today = ymd(date), prev = uniq.filter(p => p.ymd <= today).pop(), next = uniq.find(p => p.ymd > today);
+  const daysToNext = Math.round((toDate(next.ymd) - toDate(today)) / 864e5), tuWang = daysToNext <= 18;
+  const wang = tuWang ? '土' : SI_LI[prev.name], i = WX.indexOf(wang), state = {};
+  state[WX[i]] = '旺'; state[WX[(i+1)%5]] = '相'; state[WX[(i+4)%5]] = '休'; state[WX[(i+3)%5]] = '囚'; state[WX[(i+2)%5]] = '死';
   return {wang, state, tuWang, prev, next, daysToNext};
 }
-
-function chkBtn(key, abs){
+function chkBtn(key){
   if (!cmpMode) return '';
   const v = store.get()[ymd(cur)+'|'+key];
-  const cls = v==='ok'?'ok':v==='bad'?'bad':'';
-  const label = v==='ok'?'✓ 一致':v==='bad'?'✗ 不同':'对比';
-  return `<button class="chk ${cls} ${abs?'abs':''}" data-key="${esc(key)}">${label}</button>`;
+  return `<button class="chk ${v==='ok'?'ok':v==='bad'?'bad':''}" data-key="${esc(key)}">${v==='ok'?'✓ 一致':v==='bad'?'✗ 不同':'对比'}</button>`;
 }
-const secH = (title, sub, key) => `<div class="sec-h"><h3>${title}</h3><span class="sub">${sub||''} ${chkBtn(key)}</span></div>`;
-
-function compassSVG(gods){
-  const S = 280, C = 140, R = 126, r0 = 40;
-  let s = `<svg viewBox="0 0 ${S} ${S}" width="100%" style="max-width:280px" role="img" aria-label="方位图">`;
-  s += `<circle cx="${C}" cy="${C}" r="${R}" fill="var(--surface-2)" stroke="var(--line-2)"/>`;
-  s += `<circle cx="${C}" cy="${C}" r="${R-26}" fill="none" stroke="var(--line)"/>`;
-  s += `<circle cx="${C}" cy="${C}" r="${r0}" fill="var(--surface)" stroke="var(--line-2)"/>`;
-  DIRS.forEach((d,k) => {
-    const a = (k*45 - 90) * Math.PI/180, a2 = ((k*45+22.5) - 90) * Math.PI/180;
-    s += `<line x1="${C+r0*Math.cos(a2)}" y1="${C+r0*Math.sin(a2)}" x2="${C+R*Math.cos(a2)}" y2="${C+R*Math.sin(a2)}" stroke="var(--line)"/>`;
-    const lr = R - 13;
-    s += `<text x="${C+lr*Math.cos(a)}" y="${C+lr*Math.sin(a)+4}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--serif)">${d}</text>`;
-    const here = gods.filter(g => g.dir === d);
-    here.forEach((g,j) => {
-      const gr = 70, off = (j - (here.length-1)/2) * 16;
-      s += `<text x="${C+gr*Math.cos(a)}" y="${C+gr*Math.sin(a)+off+4}" text-anchor="middle" font-size="12.5" font-weight="600" fill="${g.color}">${g.name}</text>`;
-    });
-  });
-  s += `<text x="${C}" y="${C+6}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)" font-family="var(--serif)">中</text></svg>`;
-  return s;
-}
-
-// 宜忌里的特殊用语：「诸事不宜」表示除宜所列之外都不宜
 const REST = ['馀事勿取','余事勿取'];
 function parseYiJi(yi, ji){
-  const restOnly = yi.some(x => REST.includes(x));
-  const yiItems = yi;
-  const allBad = ji.includes('诸事不宜');
-  const real = yi.filter(x => !REST.includes(x) && x !== '无');
-  const hasYi = real.length > 0;
-  let yiNote = '', jiNote = '';
-  if (allBad) jiNote = hasYi ? '除「宜」所列几项之外，其他事情都不宜进行' : '今日诸事不宜，宜静不宜动';
-  return {yiItems, jiItems: ji, restOnly, allBad, yiNote, jiNote};
+  const allBad = ji.includes('诸事不宜'), real = yi.filter(x => !REST.includes(x) && x !== '无');
+  return { yiItems: yi, jiItems: ji, restOnly: yi.some(x => REST.includes(x)), allBad, real, jiNote: allBad ? (real.length ? '除「宜」所列几项之外，其他事情都不宜进行' : '今日诸事不宜，宜静不宜动') : '' };
 }
-
 const hourRange = k => k===0 ? '23:00–00:59' : `${String(2*k-1).padStart(2,'0')}:00–${String(2*k).padStart(2,'0')}:59`;
+const lvlCls = lv => lv === '宜用' ? 'good' : lv === '慎用' ? 'bad' : 'mid';
 
-const lvlBadge = lv => `<span class="lvl ${lv==='宜用'?'good':lv==='慎用'?'bad':'mid'}">${lv}</span>`;
-function hourPlan(dh){
-  const item = (h, pos) => `<span><b>${h.zhi}时</b> <small>${hourRange(h.k)}</small> <small>（${h.reasons.filter(r => pos ? r.w > 0 : r.w < 0).slice(0,2).map(r=>r.label).join('、')}）</small></span>`;
-  return `<div class="hplan">
-    <div class="cap">按你的八字，综合黄道黑道、时家神煞、与你的冲合及五行喜忌</div>
-    <div class="row">${lvlBadge('宜用')}<div>${dh.best.map(h=>item(h,true)).join('') || '<span class="muted">今天没有特别适合你的时辰</span>'}</div></div>
-    <div class="row">${lvlBadge('慎用')}<div>${dh.avoid.map(h=>item(h,false)).join('') || '<span class="muted">今天没有需要特别避开的时辰</span>'}</div></div>
-  </div>`;
-}
-
+// ---------- 今日：主栏 ----------
 function renderToday(){
   const solar = Solar.fromDate(cur), l = solar.getLunar();
-  const jq = l.getJieQi();
-  const fest = [...solar.getFestivals(), ...l.getFestivals(), ...l.getOtherFestivals()];
-  const luck = l.getDayTianShenLuck();
-  const yj = parseYiJi(l.getDayYi(), l.getDayJi());
-  const yuePo = l.getDayXiongSha().includes('月破');
-  const wx = wangXiang(cur);
-  const me = profile ? P.build(profile) : null;
-  const ns = l.getDayNineStar();
-  const isToday = ymd(cur) === ymd(new Date());
-  const nowH = new Date().getHours();
+  const jq = l.getJieQi(), fest = [...solar.getFestivals(), ...l.getFestivals(), ...l.getOtherFestivals()];
+  const luck = l.getDayTianShenLuck(), yj = parseYiJi(l.getDayYi(), l.getDayJi()), yuePo = l.getDayXiongSha().includes('月破');
+  window.DAY_CTX = { label:'今天', yi:new Set(l.getDayYi()), ji:new Set(l.getDayJi()) };
+  window.DAY_CHONG = { gz: l.getDayChongDesc().replace(/[()（）].*$/,'').replace(/[()（）]/g,''), full: l.getDayChongDesc(), sx: l.getDayChongShengXiao(), sha: DIR_ALIAS[l.getDaySha()] || l.getDaySha() };
+  window.HOUR_CTX = l.getTimes().slice(0,12).map((h,k) => ({ label: h.getZhi()+'时', yi:new Set(h.getYi()), ji:new Set(h.getJi()) }));
+  const wx = wangXiang(cur), me = profile ? P.build(profile) : null;
+  const tsName = l.getDayTianShen(), good = luck === '吉';
+  const dzi = P.zi(l.getDayZhi()), liuHe = P.SX[(13 - dzi) % 12], sanHe = [(dzi + 4) % 12, (dzi + 8) % 12].sort((a, b) => a - b).map(i => P.SX[i]);
 
-  const gods = [
-    {name:'喜神', dir:l.getDayPositionXiDesc(), color:'var(--accent)'},
-    {name:'福神', dir:l.getDayPositionFuDesc(), color:'var(--gold)'},
-    {name:'财神', dir:l.getDayPositionCaiDesc(), color:'var(--good)'},
-    {name:'阳贵', dir:l.getDayPositionYangGuiDesc(), color:'var(--water)'},
-    {name:'阴贵', dir:l.getDayPositionYinGuiDesc(), color:'var(--water)'},
-    {name:'煞', dir:DIR_ALIAS[l.getDaySha()]||l.getDaySha(), color:'var(--bad)'},
-  ];
+  const sa = DIR_ALIAS[l.getDaySha()] || l.getDaySha();
+  const gods = [ {name:'财神', dir:l.getDayPositionCaiDesc(), good:true}, {name:'喜神', dir:l.getDayPositionXiDesc(), good:true}, {name:'福神', dir:l.getDayPositionFuDesc(), good:true},
+                 {name:'阳贵', dir:l.getDayPositionYangGuiDesc(), good:true}, {name:'阴贵', dir:l.getDayPositionYinGuiDesc(), good:true},
+                 {name:'煞方', key:'煞', dir:sa, good:false}, {name:'太岁', dir:l.getDayPositionTaiSuiDesc(), good:false} ];
+  const bars = WX.map(w => { const st = wx.state[w], pct = {旺:100,相:78,休:55,囚:34,死:14}[st];
+    return `<div class="bar"><span class="el" style="color:${WX_COLOR[w]}">${w}</span><div class="track"><div class="fill" style="width:${pct}%;background:${WX_COLOR[w]}"></div></div><span class="st">${t(st)}</span></div>`; }).join('');
+  const openDetails = isDesktop() ? 'open' : '';
 
-  const dh = me ? P.dayHours(me, l) : null;
-  const hours = l.getTimes().slice(0,12).map((t,k) => {
-    const lo = k===0 ? 23 : 2*k-1, hi = k===0 ? 0 : 2*k;
-    const now = isToday && (k===0 ? (nowH===23||nowH===0) : (nowH===lo||nowH===hi));
-    const g = t.getTianShenLuck()==='吉';
-    const sha = P.hourSha(l,t);
-    const hy = parseYiJi(t.getYi(), t.getJi());
-    const hp = dh ? dh.hours[k] : null;
-    return `<div class="hour ${now?'now':''} ${hp ? (hp.level==='宜用'?'p-good':hp.level==='慎用'?'p-bad':'') : ''}">
-      <div class="t"><b>${t.getZhi()}时${now?' <span class="nowtag">· 现在</span>':''}</b><span>${hourRange(k)}</span><br><span>${t.getGanZhi()}</span></div>
-      <div class="luck ${g?'good':'bad'}">${t.getTianShen()}<small>${t.getTianShenType()} · ${t.getTianShenLuck()}</small></div>
-      <div><div class="tags">${sha.map(([x,b])=>`<span class="tag ${b?'bad':'good'}">${x}</span>`).join('')||'<span class="muted">—</span>'}</div>
-        <div class="muted" style="font-size:12px;margin-top:6px">${t.getNineStar().toString()}</div></div>
-      <div class="yj-line"><div><i class="y">宜</i>${hy.yiItems.join(' ')}</div><div><i class="j">忌</i>${hy.allBad?'<b style="color:var(--bad);font-weight:600">诸事不宜</b>':hy.jiItems.join(' ')}</div></div>
-      <div class="side"><div>冲<b>${t.getChongDesc()}</b> 煞<b>${t.getSha()}</b></div><div>财神<b>${t.getPositionCaiDesc()}</b> 喜神<b>${t.getPositionXiDesc()}</b></div></div>
-      ${hp ? `<div class="mine">${lvlBadge(hp.level)}<span><b>${hp.ss}时</b>　${hp.ssDesc}</span><span class="tags">${hp.reasons.map(r=>`<span class="tag ${r.w>0?'good':'bad'}">${r.label}</span>`).join('')}${hp.neutral.map(x=>`<span class="tag">${x}</span>`).join('')}</span></div>` : ''}
-    </div>`;
-  }).join('');
-
-  const bars = WX.map(w => {
-    const st = wx.state[w], pct = {旺:100,相:78,休:55,囚:34,死:14}[st];
-    return `<div class="bar"><span class="el" style="color:${WX_COLOR[w]}">${w}</span>
-      <div class="track"><div class="fill" style="width:${pct}%;background:${WX_COLOR[w]}"></div></div>
-      <span class="st" style="color:${st==='旺'||st==='相'?WX_COLOR[w]:'var(--muted)'}">${st}</span></div>`;
-  }).join('');
-
-  $('viewToday').innerHTML = `
-  <section class="card">${chkBtn('基本', true)}
+  $('colMain').innerHTML = `
+  <section class="card" aria-label="今日总览">${chkBtn('基本')}
     <div class="hero">
-      <div class="dayblock"><div class="num">${solar.getDay()}</div><div class="ym">${solar.getYear()}年${solar.getMonth()}月 · 星期${WEEK[cur.getDay()]}</div></div>
+      <div class="daynum">${solar.getDay()}<small>${solar.getMonth()}月 · 周${WEEK[cur.getDay()]}</small></div>
       <div>
         <div class="lunar">农历${l.getMonthInChinese()}月${l.getDayInChinese()}</div>
         <div class="gz">${l.getYearInGanZhi()}年 ${l.getMonthInGanZhi()}月 ${l.getDayInGanZhi()}日 · 属${l.getYearShengXiao()}</div>
-        <div class="meta">
-          <span class="${luck==='吉'?'ok':'hl'}">${l.getDayTianShen()}${l.getDayTianShenType()}日</span>
-          <span>${l.getZhiXing()}日</span>
-          <span>${l.getXiu()}宿（${l.getXiuLuck()}）</span>
-          ${jq?`<span class="hl">${jq}</span>`:''}
-          ${fest.map(f=>`<span class="hl">${esc(f)}</span>`).join('')}
-          <span>冲${l.getDayChongDesc()} 煞${l.getDaySha()}</span>
+        <div class="badges">
+          <span class="badge brand">${t(l.getZhiXing()+'日', l.getZhiXing()+'日', '建除十二值')}</span>
+          <span class="badge brand">${t(tsName, tsName, '黄道黑道')}</span>
+          ${yuePo ? `<button class="badge bad t" data-t="月破" data-c="凶煞" style="text-decoration:none">月破</button>` : ''}
+          <span class="badge brand">${t(l.getXiu()+'宿', '星宿')}</span>
+          <span class="badge brand">${t('冲'+l.getDayChongDesc()+' · 煞'+l.getDaySha(), '冲煞')}</span>
+          <span class="badge brand">${t('合' + [liuHe, ...sanHe].join('、'), '合生肖', '名词')}</span>
+          ${jq ? `<span class="badge brand">${jq}</span>` : ''}
+          ${fest.map(f => `<span class="badge brand">${esc(f)}</span>`).join('')}
         </div>
       </div>
     </div>
     <div class="yiji">
-      <div class="yj"><span class="stamp yi">宜</span><div><div class="words">${yj.yiItems.map(x=>`<span>${x}</span>`).join('')}</div>${yj.yiNote?`<div class="yjnote">${yj.yiNote}</div>`:''}</div></div>
-      <div class="yj"><span class="stamp ji">忌</span><div><div class="words">${yj.jiItems.map(x=>`<span class="${x==='诸事不宜'?'strong':''}">${x}</span>`).join('')}</div>${yj.jiNote?`<div class="yjnote">${yj.jiNote}</div>`:''}</div></div>
+      <div class="yj"><span class="stamp yi" aria-label="宜">宜</span><div><div class="words">${yj.yiItems.map(x => t(x)).join('')}</div></div></div>
+      <div class="yj"><span class="stamp ji" aria-label="忌">忌</span><div><div class="words">${yj.jiItems.map(x => x === '诸事不宜' ? `<span class="strong">${t(x)}</span>` : t(x)).join('')}</div>${yj.jiNote ? `<div class="yjnote">${yj.jiNote}</div>` : ''}</div></div>
     </div>
-    ${yuePo ? `<div class="alert"><b>月破日</b>与月令相冲，大事勿用（嫁娶、开市、入宅、签约等都宜避开）；只适合拆卸、清理、祭祀这类事。</div>` : ''}
   </section>
 
-  ${me ? todayCard(me, l, wx) : `<section class="card prompt"><p>输入你的生辰，就能看到今天对你是什么日、引动哪些神煞、哪个时辰最好。</p><button class="btn primary" data-goto="me">设置我的命盘</button></section>`}
+  ${me ? youCard(me, l, wx) : `<section class="card cta"><p>输入你的生辰，就能看到今天对你是什么日、引动哪些神煞、哪个时辰最好。</p><button class="btn primary" data-goto="me">设置我的命盘</button></section>`}
 
-  <div class="section-title">日课详情</div>
-  <div class="grid2">
-    <section class="card">${secH('神煞', '吉神宜趋 · 凶煞宜忌', '神煞')}
-      <dl class="kv">
-        <dt>吉神</dt><dd class="tags">${tags(l.getDayJiShen(),'good')}</dd>
-        <dt>凶煞</dt><dd class="tags">${tags(l.getDayXiongSha(),'bad')}</dd>
-        <dt>冲煞</dt><dd>冲${l.getDayChongDesc()}，煞${l.getDaySha()}</dd>
-        <dt>彭祖百忌</dt><dd>${l.getPengZuGan()}；${l.getPengZuZhi()}</dd>
-        <dt>胎神</dt><dd>${l.getDayPositionTai()}</dd>
-        <dt>日禄</dt><dd>${l.getDayLu()}</dd>
-        <dt>旬空</dt><dd>${l.getDayXun()}旬 · 空${l.getDayXunKong()}</dd>
-      </dl>
-    </section>
+  <details class="card acc" ${openDetails}><summary>方位<span class="sub">上北下南</span></summary><div class="acc-b">${chkBtn('方位')}
+    <div class="jg">${['西北','正北','东北','正西','中','正东','西南','正南','东南'].map(p => {
+      if (p === '中') return `<div class="c mid"><b>中</b><span class="d">上北下南</span></div>`;
+      const here = gods.filter(g => g.dir === p), cls = !here.length ? 'empty' : here.every(g => g.good) ? 'good' : here.every(g => !g.good) ? 'bad' : 'mix';
+      return `<div class="c ${cls}"><span class="d">${p}</span>${here.map(g => `<span class="g" style="color:var(--${g.good ? 'good' : 'bad'})">${t(g.name, g.key || g.name, '名词')}</span>`).join('')}</div>`;
+    }).join('')}</div>
+  </div></details>
 
-    <section class="card">${secH('方位', '上北下南', '方位')}
-      <div class="compass">${compassSVG(gods)}</div>
-      <div class="legend">${gods.map(g=>`<div><span>${g.name}</span> <b>${g.dir}</b></div>`).join('')}<div><span>太岁</span> <b>${l.getDayPositionTaiSuiDesc()}</b></div></div>
-    </section>
+  <details class="card acc" ${openDetails}><summary>神煞<span class="sub">吉神 ${l.getDayJiShen().length} · 凶煞 ${l.getDayXiongSha().length}</span></summary><div class="acc-b">${chkBtn('神煞')}
+    <dl class="kv">
+      <dt>吉神宜趋</dt><dd class="chips">${l.getDayJiShen().map(x => chip(x, x, 'good', '吉神')).join('')}</dd>
+      <dt>凶煞宜忌</dt><dd class="chips">${l.getDayXiongSha().map(x => chip(x, x, 'bad', '凶煞')).join('')}</dd>
+      <dt>${t('冲煞')}</dt><dd>冲${l.getDayChongDesc()}，煞${l.getDaySha()}</dd>
+      <dt>${t('合生肖', '合生肖', '名词')}</dt><dd>六合 ${liuHe}；三合 ${sanHe.join('、')}</dd>
+      <dt>${t('彭祖百忌')}</dt><dd>${l.getPengZuGan()}；${l.getPengZuZhi()}</dd>
+      <dt>${t('胎神')}</dt><dd>${l.getDayPositionTai()}</dd>
+      <dt>${t('日禄')}</dt><dd>${l.getDayLu()}</dd>
+      <dt>${t('旬空')}</dt><dd>${l.getDayXun()}旬 · 空${l.getDayXunKong()}</dd>
+      <dt>${t('纳音')}</dt><dd>年 ${l.getYearNaYin()} · 月 ${l.getMonthNaYin()} · 日 ${l.getDayNaYin()}</dd>
+      <dt>${t('月相')}</dt><dd>${l.getYueXiang()}</dd>
+    </dl></div></details>
 
-    <section class="card">${secH('当旺五行', wx.tuWang ? `土旺用事 · 距${wx.next.name}${wx.daysToNext}日` : `${wx.prev.name}后 · ${wx.wang}当令`, '五行')}
-      <div class="bars">${bars}</div>
-      <dl class="kv" style="margin-top:18px">
-        <dt>纳音</dt><dd>年 ${l.getYearNaYin()} · 月 ${l.getMonthNaYin()} · 日 ${l.getDayNaYin()}</dd>
-        <dt>下一四立</dt><dd>${wx.next.name}（${wx.next.ymd}）</dd>
-      </dl>
-    </section>
+  <details class="card acc" ${openDetails}><summary>季节五行<span class="sub">${wx.wang}最旺 · ${wx.tuWang ? `${wx.next.name}前土旺` : `${wx.prev.name}后`}</span></summary><div class="acc-b">${chkBtn('五行')}
+    <p class="intro">这是<b>季节</b>的五行：${wx.tuWang ? `${wx.next.name}前约十八天是「${t('土旺用事')}」` : `${wx.prev.name}之后`}，天地间<b>${wx.wang}气最旺</b>、${WX.find(w => wx.state[w] === '死')}气最弱。跟个人八字无关，大约三个月才换一次。</p>
+    <p class="intro">它和今天日子本身的五行（${l.getDayGan()}${P.WX[P.GAN_WX[P.gi(l.getDayGan())]]}、${l.getDayZhi()}${P.WX[P.ZHI_WX[P.zi(l.getDayZhi())]]}）不是同一回事，所以两者不一样很正常。</p>
+    <div class="bars">${bars}</div>
+    <div class="note">${['旺','相','休','囚','死'].map(x => t(x)).join(' → ')}，由强到弱。</div>
+    <dl class="kv" style="margin-top:16px"><dt>换季</dt><dd>${wx.next.name}（${wx.next.ymd}）起，${SI_LI[wx.next.name]}气当令</dd></dl>
+  </div></details>`;
 
-    <section class="card">${secH('九星 · 星宿', '', '九星')}
-      <dl class="kv">
-        <dt>日九星</dt><dd>${ns.toFullString()}</dd>
-        <dt>${l.getXiu()}宿</dt><dd>${l.getXiu()}${l.getZheng()}${l.getAnimal()} · ${l.getXiuLuck()}<div class="poem" style="margin-top:6px">${l.getXiuSong()}</div></dd>
-        <dt>月相</dt><dd>${l.getYueXiang()}</dd>
-      </dl>
-    </section>
-  </div>
+  renderHours(l, me);
+}
 
-  <div class="section-title">时辰吉凶</div>
-  <section class="card" style="padding:12px 16px">${chkBtn('时辰', true)}
-    ${dh ? hourPlan(dh) : ''}
-    <div class="hours">${hours}</div>
+// ---------- 今日对你 ----------
+const WX_SWATCH = [[['绿','#3f8f4f'],['青','#2a8a8a']], [['红','#d2453a'],['紫','#7b4fa0'],['橙','#e07b2e'],['粉','#e89ab0']],
+                   [['黄','#e3b740'],['咖啡','#6f4e37'],['棕','#8b5e34'],['卡其','#c3b091']], [['白','#ffffff'],['银','#c0c0c0'],['金','#d4af37'],['杏','#f3e1c4']],
+                   [['黑','#1f1f1f'],['蓝','#2f5fa8'],['灰','#8a8a8a']]];
+const swatches = es => es.flatMap(e => WX_SWATCH[e]).map(([nm, hex]) => `<span class="sw"><i style="background:${hex}"></i>${nm}</span>`).join('');
+function youCard(n, l, wx){
+  const tt = P.today(n, l, wx.wang), dh = P.dayHours(n, l), lc = P.luckyColor(n, tt);
+  const tg = tt.tags.map(x => x.t);
+  // 已经用本命日标签说了的冲、刑，不在总结里重复
+  const covered = r => (r.t === '冲' && r.k === 0 && (tg.includes('冲生肖日') || tg.includes('天克地冲日'))) || (r.t === '冲' && r.k === 2 && tg.includes('冲本命日')) || (r.t === '刑' && r.k === 0 && tg.includes('三刑日'));
+  // 每个生活方面一条：有不好的关系就讲影响，否则是「和顺」；已经用本命日标签讲了的冲、刑不重复
+  const areas = [0, 1, 2, 3].map(k => { const rs = tt.rels.filter(r => r.k === k && !covered(r)), bad = rs.filter(r => r.bad);
+    return {k, rs, bad, eff: relEffs(bad)}; }).filter(a => a.rs.length);
+  const parts = [tt.advice.replace(/。$/, '')];
+  // 留意：和本命的冲刑害破（按生活方面、用白话），加上不好的神煞的提醒（只写白话，不写神煞名）；好的神煞已变成本命日标签
+  // 同样影响的方面合成一句，如「长辈、工作和父母方面容易有小波折」
+  const byEff = {}; areas.filter(a => a.bad.length).forEach(a => { const k = a.eff.join('、'); (byEff[k] = byEff[k] || []).push(AREA_S[a.k]); });
+  const watch = [...Object.entries(byEff).map(([e, ns]) => `${ns.join('、')}方面容易有${e}`), ...tt.sha.filter(x => BAD_SHA.includes(x)).map(x => BAD_SHA_PLAIN[x])];
+  if (watch.length) parts.push(`留意${watch.join('，')}`);
+  // 时辰另起一段，按时间先后排，并写上钟表时间
+  const hrs = hs => [...hs].sort((a, b) => a.k - b.k).map(h => `<span class="nw"><b>${h.zhi}时</b> ${hourRange(h.k)}</span>`).join('');
+  const hourLines = [dh.best.length && `<div class="hrow"><span class="hl good">较好的时辰</span><span class="hlist">${hrs(dh.best)}</span></div>`, dh.avoid.length && `<div class="hrow"><span class="hl bad">尽量避开</span><span class="hlist">${hrs(dh.avoid)}</span></div>`].filter(Boolean).join('');
+  const stars = `<span class="stars" title="综合参考分">${'★'.repeat(tt.stars)}<span class="off">${'★'.repeat(5-tt.stars)}</span></span>`;
+  const bz = n.pillars.map(p => p ? ganC(p[0]) + zhiC(p[1]) : '').filter(Boolean).join(' ');
+  return `<section class="card you" aria-label="今日对你">${chkBtn('个人今日')}
+    <div class="you-h"><div><h2>今日对你</h2><div class="by">根据你的八字推算　<b>${bz}</b>${n.hasTime ? '' : '（时辰未知）'}</div></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+      <div class="title">你的<em>${t(tt.ss+'日', tt.ss)}</em></div>${stars}
+    </div>
+    <div class="daytags">${tt.tags.map(x => `<button class="dtag ${x.bad ? 'bad' : x.mid ? 'mid' : 'good'}" data-t="${x.t}" data-c="本命日">${x.t}</button>`).join('')}</div>
+    <div class="summary"><p>${parts.join('；')}。</p>${hourLines ? `<div class="sum-hours">${hourLines}</div>` : ''}</div>
+    <div class="facts">
+      <div class="fact"><span class="label">今日五行</span><div class="serif">${tt.dayWx.map((i,k) => `<span style="color:${wxc(i)}">${k ? tt.dz : tt.dg}${P.WX[i]}</span>`).join('　')}</div></div>
+      <div class="fact"><span class="label">幸运色</span><div class="sw-row">${swatches([lc.lucky])}</div></div>
+      <div class="fact"><span class="label">不宜色</span><div class="sw-row">${swatches(lc.avoid)}</div></div>
+      <div class="fact"><span class="label">流年</span><div>${tt.ly}（${t(tt.lySS)}）${tt.ty.length ? `　<span class="badge bad">${tt.ty.join('、')}</span>` : ''}</div></div>
+      ${tt.dy ? `<div class="fact"><span class="label">大运</span><div>${tt.dy.getGanZhi()}（${t(P.shiShen(n.dayGan, tt.dy.getGanZhi()[0]))}运，${tt.dy.getStartYear()}–${tt.dy.getEndYear()}）</div></div>` : ''}
+    </div>
+    <div class="note">星级为规则加总的参考分。</div>
   </section>`;
 }
 
-// ---------- 本命 ----------
+// ---------- 时辰（电脑在右栏、手机是独立分页） ----------
+function renderHours(l, me){
+  const isToday = ymd(cur) === ymd(new Date()), nowH = new Date().getHours();
+  const nowIdx = Math.floor(((nowH + 1) % 24) / 2);
+  const dh = me ? P.dayHours(me, l) : null;
+  const times = l.getTimes().slice(0, 12);
+  if (openHour === null) openHour = isToday ? nowIdx : null;
+  // 通书不把日破（冲当天）或「诸事不宜」的时辰列为吉时，即使是黄道
+  const flaw = times.map(h => P.hourSha(l, h).some(([x]) => x === '日破') ? '日破' : h.getJi().includes('诸事不宜') ? '诸事不宜' : '');
+  const cls = k => dh ? lvlCls(dh.hours[k].level) : (times[k].getTianShenLuck() === '吉' && !flaw[k] ? 'good' : 'bad');
+  const strip = times.map((h,k) => `<button class="${cls(k)} ${isToday && k === nowIdx ? 'now' : ''}" data-hour="${k}" aria-label="${h.getZhi()}时">${h.getZhi()}<small>${dh ? dh.hours[k].level : flaw[k] ? (flaw[k] === '日破' ? '日破' : '不宜') : h.getTianShen()}</small></button>`).join('');
+  const plan = dh ? `<div class="plan">
+      <div class="row"><span class="badge good">宜用</span><div>${dh.best.map(h => `<span><b>${h.zhi}时</b> <span class="muted">${hourRange(h.k)}</span></span>`).join('') || '<span class="muted">今天没有特别适合你的时辰</span>'}</div></div>
+      <div class="row"><span class="badge bad">慎用</span><div>${dh.avoid.map(h => `<span><b>${h.zhi}时</b> <span class="muted">${hourRange(h.k)}</span></span>`).join('') || '<span class="muted">没有需要特别避开的时辰</span>'}</div></div>
+    </div>` : '';
+  const rows = times.map((h,k) => {
+    const g = h.getTianShenLuck() === '吉', sha = P.hourSha(l, h), hp = dh ? dh.hours[k] : null;
+    const yjh = parseYiJi(h.getYi(), h.getJi()), open = openHour === k, now = isToday && k === nowIdx;
+    return `<div class="hr ${open ? 'open' : ''} ${now ? 'now' : ''}" id="hr${k}">
+      <button class="hr-head" data-toggle="${k}" aria-expanded="${open}">
+        <span class="nm"><b>${h.getZhi()}时${now ? '<span class="nowtag">现在</span>' : ''}</b><span>${hourRange(k)}</span></span>
+        <span class="mid-col"><span class="badge ${hp ? 'brand' : g ? 'good' : 'bad'}">${h.getTianShen()}</span>${hp ? `<span class="badge ${lvlCls(hp.level)}">${hp.level}</span>` : flaw[k] ? `<span class="badge bad">${flaw[k]}</span>` : ''}</span>
+        <span class="muted" style="font-size:13px">${h.getGanZhi()}</span><span class="chev"></span>
+      </button>
+      ${open ? `<div class="hr-body">
+        ${hp ? `<div class="mine"><div class="top"><span class="who">这个时辰对你</span><span class="badge ${lvlCls(hp.level)}">${t(hp.level)}</span><b class="serif">${t(hp.ss+'时', hp.ss)}</b></div><div class="chips">${hp.reasons.map(r => chip(r.label.replace(/[黄黑]道$/, ''), hourReasonKey(r.label), r.w > 0 ? 'good' : 'bad', hourReasonCat(r.label))).join('')}${hp.neutral.map(x => chip(x, x.replace(/^你的/,''), '', '个人神煞')).join('')}</div></div>` : ''}
+        <dl class="kv">
+          <dt>神煞</dt><dd><div class="chips">${sha.map(([x,b]) => chip(x, x, b ? 'bad' : 'good', '时家神煞')).join('') || '<span class="muted">—</span>'}</div></dd>
+          <dt style="color:var(--good)">宜</dt><dd>${yjh.yiItems.map(x => t(x)).join(' ')}</dd>
+          <dt style="color:var(--bad)">忌</dt><dd>${yjh.allBad ? `<b style="color:var(--bad)">${t('诸事不宜')}</b>` : yjh.jiItems.map(x => t(x)).join(' ')}</dd>
+          <dt>冲煞</dt><dd>冲${h.getChongDesc()} · 煞${h.getSha()}</dd>
+          <dt>方位</dt><dd>${t('财神')}${h.getPositionCaiDesc()} · ${t('喜神')}${h.getPositionXiDesc()}</dd>
+        </dl>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+  $('colSide').innerHTML = `<section class="card">${chkBtn('时辰')}
+    <div class="card-h"><h2>时辰吉凶${dh ? ' <span class="mine-tag lg">根据你的八字</span>' : ''}</h2><span class="sub">${isToday ? '点时辰看详细' : ymd(cur)}</span></div>
+    <div class="legendline">${dh ? '<span><i class="dot good"></i>宜用</span><span><i class="dot mid"></i>平</span><span><i class="dot bad"></i>慎用</span>' : '<span><i class="dot good"></i>吉</span><span><i class="dot bad"></i>凶</span>'}</div>
+    <div class="strip">${strip}</div>
+    ${plan}
+    <div class="hours">${rows}</div>
+  </section>`;
+}
+const hourReasonCat = s => s === '诸事不宜' ? '宜忌用语' : /[黄黑]道$/.test(s) ? '黄道黑道' : /^你的/.test(s) ? '个人神煞' : /你(日支|生肖|月支|时支)$/.test(s) ? '与本命的关系' : /^五行/.test(s) ? '名词' : '时家神煞';
+const hourReasonKey = s => /黄道$/.test(s) ? s.replace('黄道','') : /黑道$/.test(s) ? s.replace('黑道','') : s === '你的贵人时' ? '天乙贵人' : s === '你的禄时' ? '禄' : s === '你的文昌时' ? '文昌' : s === '你的空亡时' ? '空亡' : /^你的/.test(s) ? s.replace('你的','') : /^冲你/.test(s) ? '冲' : /^合你/.test(s) ? '六合' : /^三合你/.test(s) ? '三合' : /^刑你/.test(s) ? '刑' : /^害你/.test(s) ? '害' : /^破你/.test(s) ? '破' : s;
+
+// ---------- 命盘 ----------
 let profile = null;
 try { profile = JSON.parse(localStorage.getItem('ts-me') || 'null'); } catch(e) {}
 const wxc = i => WX_COLOR[P.WX[i]];
 const ganC = g => `<span style="color:${wxc(P.GAN_WX[P.gi(g)])}">${g}</span>`;
 const zhiC = z => `<span style="color:${wxc(P.ZHI_WX[P.zi(z)])}">${z}</span>`;
 const wxB = i => `<b class="serif" style="color:${wxc(i)}">${P.WX[i]}</b>`;
-
 const gejuName = g => g === '正格' ? '正格' : g + '格';
+// 命卦（八宅）：按出生年（立春为界）与性别；吉凶八方
+const GUA = {1:['坎','一白','北','东四命'], 2:['坤','二黑','西南','西四命'], 3:['震','三碧','东','东四命'], 4:['巽','四绿','东南','东四命'],
+             6:['乾','六白','西北','西四命'], 7:['兑','七赤','西','西四命'], 8:['艮','八白','东北','西四命'], 9:['离','九紫','南','东四命']};
+const BAZHAI = {  // 生气 天医 延年 伏位 祸害 五鬼 六煞 绝命
+  坎:['东南','东','南','北','西','东北','西北','西南'], 离:['东','东南','北','南','东北','西','西南','西北'],
+  震:['南','北','东南','东','西南','西北','东北','西'], 巽:['北','南','东','东南','西北','西南','西','东北'],
+  乾:['西','东北','西南','西北','东南','东','北','南'], 坤:['东北','西','西北','西南','东','东南','南','北'],
+  艮:['西南','西北','西','东北','南','北','东','东南'], 兑:['西北','西南','东北','西','北','南','东南','东']};
+const BAZHAI_N = ['生气','天医','延年','伏位','祸害','五鬼','六煞','绝命'];
+function mingGua(n){
+  if (!n.p.gender) return null;
+  // 以立春为年界：立春前出生算上一年
+  const lc = Lunar.fromYmd(n.solar.getYear(), 6, 1).getJieQiTable()['立春'];
+  const yr = n.solar.toYmdHms() < lc.toYmdHms() ? n.solar.getYear() - 1 : n.solar.getYear();
+  // 男：(11 − 年数 mod 9) mod 9；女：(年数 mod 9 + 4) mod 9；得 0 作 9；得 5 男寄坤（2）、女寄艮（8）
+  let g = n.p.gender === 'm' ? (11 - yr % 9) % 9 : (yr % 9 + 4) % 9;
+  if (g === 0) g = 9;
+  if (g === 5) g = n.p.gender === 'm' ? 2 : 8;
+  const [name, star, dir, group] = GUA[g];
+  return {num: g, name, star, dir, group, dirs: BAZHAI[name], yr};
+}
 
+let natalDy = null, natalYear = new Date().getFullYear();   // 选中的大运、流年流月的年份
+const MONTH_CN = ['正','二','三','四','五','六','七','八','九','十','冬','腊'];
+const NATAL_BAD = ['羊刃','劫煞','亡神','孤辰','寡宿','阴差阳错','十恶大败','天罗','地网','血刃','流霞'], NATAL_MID = ['红艳','魁罡','华盖','驿马','桃花'];
+const NS_T = { 天乙: {甲:'丑未',戊:'丑未',庚:'丑未',乙:'子申',己:'子申',丙:'亥酉',丁:'亥酉',壬:'卯巳',癸:'卯巳',辛:'寅午'},
+               文昌: {甲:'巳',乙:'午',丙:'申',丁:'酉',戊:'申',己:'酉',庚:'亥',辛:'戌',壬:'寅',癸:'卯'},
+               SANHE4: [['寅','酉'],['亥','午'],['申','卯'],['巳','子']] };   // 与 personal.js 的表一致（渊海子平、三命通会）
 function natalCard(n){
-  const cols = ['年柱','月柱','日柱','时柱'];
+  const cols = ['年柱','月柱','日柱','时柱'], ec = n.ec, lun = n.lunar, by = n.solar.getYear();
   const cell = (k, f) => n.pillars[k] ? f(k) : '<span class="muted">—</span>';
-  const row = (name, f) => `<tr><th class="row">${name}</th>${cols.map((_,k)=>`<td class="${k===2?'day':''}">${cell(k,f)}</td>`).join('')}</tr>`;
-  const st = n.st, x = n.xy, maxC = Math.max(...n.count);
-  const ROLES = ['比劫','食伤','财','官杀','印'];
-  const yongEl = x.yong ? (n.me + ROLES.indexOf(x.yong)) % 5 : null;
-  const que = P.WX.filter((_,i)=>n.count[i]===0);
-  const curY = new Date().getFullYear();
+  const row = (name, f, cls = '') => `<tr class="${cls}"><th class="row">${name}</th>${cols.map((_,k) => `<td class="${k===2?'day':''}">${cell(k,f)}</td>`).join('')}</tr>`;
+  const st = n.st, x = n.xy, ROLES = ['比劫','食伤','财','官杀','印'], curY = new Date().getFullYear();
+  const yongEl = x.yong ? (n.me + ROLES.indexOf(x.yong)) % 5 : null, pw = P.power(n), rel = P.relations(n), kong = ec.getDayXunKong(), gua = mingGua(n);
+  const shaP = P.natalShensha(n);
+  const sxOf = z => `${z}（${P.SX[P.zi(z)]}）`, ns = (tbl, key) => [...(tbl[key] || '')].map(sxOf).join('、');
+  const info = [
+    ['阳历', `${by}年${n.solar.getMonth()}月${n.solar.getDay()}日${n.hasTime ? ' ' + n.p.time : ''}`],
+    ['农历', `${lun.getYearInChinese()}年${lun.getMonthInChinese()}月${lun.getDayInChinese()}${n.hasTime ? ' ' + lun.getTimeZhi() + '时' : ''}`],
+    ['生肖', '属' + lun.getYearShengXiaoByLiChun()],
+    ['日主', `<b class="serif">${ganC(n.dayGan)}${P.WX[n.me]}</b>`],
+    ['命宫', n.hasTime ? ec.getMingGong() : '—'], ['胎元', ec.getTaiYuan()],
+    ['年空亡', ec.getYearXunKong()], ['日空亡', kong],
+    ['贵人', ns(NS_T.天乙, n.dayGan)], ['文昌', ns(NS_T.文昌, n.dayGan)],
+    ['桃花', sxOf(NS_T.SANHE4[P.zi(n.zhi[0]) % 4][1])], ['驿马', sxOf(NS_T.SANHE4[P.zi(n.zhi[0]) % 4][0])],
+    ['命卦', gua ? `${gua.name}卦 · ${gua.group}` : '<span class="muted">填写性别后显示</span>'],
+  ];
+  // 大运与流年
+  const dys = n.dayun || [], curDy = dys.findIndex(d => d.getStartYear() <= curY && curY <= d.getEndYear());
+  const selDy = natalDy !== null && dys[natalDy] ? natalDy : (curDy >= 0 ? curDy : 0), dySel = dys[selDy];
+  const ssZ = z => P.shiShen(n.dayGan, P.ZHI_MAIN[P.zi(z)]);
+  // 流年流月
+  const lyGz = Lunar.fromYmd(natalYear, 6, 1).getYearInGanZhi(), lyz = lyGz[1];
+  const taiSui = [lyz === n.zhi[0] ? '值太岁（本命年）' : '', ...zhiRelOf(lyz, n.zhi[0]).filter(r => r.bad).map(r => r.t + '太岁')].filter(Boolean);
+  const months = P.liuYue(natalYear);
   return `
-  <section class="card">
-    <div class="sec-h"><h3>四柱八字</h3><span class="sub">${n.solar.toYmd()}${n.hasTime?' '+n.p.time:'（时辰未知）'} · 农历${n.lunar.getYearInGanZhi()}年${n.lunar.getMonthInChinese()}月${n.lunar.getDayInChinese()} · 属${n.lunar.getYearShengXiaoByLiChun()}</span></div>
-    <table class="pillars">
-      <tr><th class="row"></th>${cols.map(c=>`<th>${c}</th>`).join('')}</tr>
-      ${row('十神', k => k===2 ? `<b style="color:var(--accent)">日主</b>` : P.shiShen(n.dayGan, n.gan[k]))}
-      ${row('天干', k => `<span class="big">${ganC(n.gan[k])}</span>`)}
-      ${row('地支', k => `<span class="big">${zhiC(n.zhi[k])}</span>`)}
-      ${row('藏干', k => n.hide[k].map(g=>`${ganC(g)}<span class="ss">${P.shiShen(n.dayGan,g)}</span>`).join(''))}
-      ${row('纳音', k => n.nayin[k])}
-      ${row('地势', k => n.dishi[k])}
-    </table>
+  <section class="card span2">
+    <div class="card-h"><h2>基本资料</h2><span class="sub">${n.p.gender === 'm' ? '男' : n.p.gender === 'f' ? '女' : ''}</span></div>
+    <div class="info">${info.map(([k, v]) => `<div><span class="label">${has(k) ? t(k) : k}</span><div class="v">${v}</div></div>`).join('')}</div>
   </section>
-
-  <div class="grid2">
-    <section class="card">${secH('日主与喜用', '扶抑 + 调候')}
-      <dl class="kv">
-        <dt>日主</dt><dd><b class="serif" style="font-size:17px">${ganC(n.dayGan)}${P.WX[n.me]}</b>　${x.qr || gejuName(x.geju)}</dd>
-        <dt>格局</dt><dd>${x.geju === '正格' ? '正格' : gejuName(x.geju)}</dd>
-        <dt>用神</dt><dd>${yongEl !== null ? wxB(yongEl) + '　' : ''}${x.how}</dd>
-        ${x.tiaohou ? `<dt>调候</dt><dd>${x.tiaohouUsed ? `生于${n.zhi[1]}月，以调候为急，取${x.tiaohouUsed}为喜` : `《穷通宝鉴》此月宜${[...x.tiaohou].join('、')}；春秋以扶抑为主`}</dd>` : ''}
-        <dt>喜</dt><dd>${st.xi.map(wxB).join('　')}</dd>
-        <dt>忌</dt><dd>${st.ji.map(wxB).join('　')}</dd>
-      </dl>
-      <div class="bars" style="margin-top:18px">${P.WX.map((w,i)=>`<div class="bar"><span class="el" style="color:${wxc(i)}">${w}</span><div class="track"><div class="fill" style="width:${maxC?n.count[i]/maxC*100:0}%;background:${wxc(i)}"></div></div><span class="st">${n.count[i]}</span></div>`).join('')}</div>
-      <div class="note">五行个数按天干及地支本气计算${que.length?`，命中缺${que.join('、')}`:''}。</div>
-    </section>
-
-    <section class="card">${secH('命带神煞', '括号内为所在柱')}
-      <div class="tags">${Object.entries(n.natalSha).map(([s,w])=>`<span class="tag ${['劫煞','亡神','羊刃'].includes(s)?'bad':'good'}">${s}（${w.join('')}）</span>`).join('')||'<span class="muted">—</span>'}</div>
-      <ul class="shalist" style="margin-top:12px">${Object.keys(n.natalSha).map(s=>`<li>${P.SHA_DESC[s]||s}</li>`).join('')}</ul>
-      <dl class="kv" style="margin-top:14px"><dt>日空亡</dt><dd>${n.xunKong}</dd></dl>
-    </section>
-  </div>
-
-  <section class="card">${secH('大运', n.dayun ? n.yunStart : '填写性别后显示')}
-    ${n.dayun ? `<div class="dayun">${n.dayun.map(d=>`<div class="${d.getStartYear()<=curY&&curY<=d.getEndYear()?'cur':''}"><b>${d.getGanZhi()}</b>${d.getStartYear()}<br>${P.shiShen(n.dayGan,d.getGanZhi()[0])}</div>`).join('')}</div>` : '<p class="muted" style="margin:0">选择性别后即可排出大运。</p>'}
-    <div class="note">喜用依扶抑与调候（《穷通宝鉴》）推定。出生时间按当地钟表时间。</div>
-  </section>`;
+  <section class="card">
+    <div class="card-h"><h2>四柱八字</h2><span class="sub">${n.hasTime ? '' : '时辰未知'}</span></div>
+    <div class="pillars-wrap"><table class="pillars">
+      <tr><th class="row"></th>${cols.map(c => `<th>${c}</th>`).join('')}</tr>
+      ${row('十神', k => k===2 ? `<b style="color:var(--ink)">日主</b>` : t(P.shiShen(n.dayGan, n.gan[k])))}
+      ${row('天干', k => `<span class="big">${ganC(n.gan[k])}</span>`)}
+      ${row('地支', k => `<span class="big">${zhiC(n.zhi[k])}</span>${kong.includes(n.zhi[k]) && k !== 2 ? '<span class="kong">空</span>' : ''}`)}
+      ${row('藏干', k => n.hide[k].map(g => `${ganC(g)}<span class="ss">${P.shiShen(n.dayGan,g)}</span>`).join(''))}
+      ${row(t('星运'), k => n.dishi[k])}
+      ${row(t('自坐'), k => P.changSheng(n.gan[k], n.zhi[k]))}
+      ${row('纳音', k => n.nayin[k])}
+      ${row('神煞', k => shaP[k].length ? `<div class="shacol">${shaP[k].map(s => chip(s, s, NATAL_BAD.includes(s) ? 'bad' : NATAL_MID.includes(s) ? '' : 'good', '命带神煞')).join('')}</div>` : '<span class="muted">—</span>', 'sharow')}
+    </table></div>
+    <div class="note">颜色代表五行：${P.WX.map((w,i) => `<b class="serif" style="color:${wxc(i)}">${w}</b>`).join(' ')}。神煞只列有古籍原文的（《渊海子平》《三命通会》《协纪辨方书》），点开可看出处。</div>
+    ${rel.length ? `<div class="relh">干支关系</div><div class="chips">${rel.map(r => `<span class="chip ${r.good ? 'good' : 'bad'}" style="cursor:default">${r.t}<small>· ${r.where}</small></span>`).join('')}</div>` : ''}
+  </section>
+  <section class="card">
+    <div class="card-h"><h2>日主与喜用</h2><span class="sub">扶抑 + 调候</span></div>
+    <dl class="kv">
+      <dt>日主</dt><dd><b class="serif" style="font-size:18px">${ganC(n.dayGan)}${P.WX[n.me]}</b>　${x.qr || gejuName(x.geju)}</dd>
+      <dt>格局</dt><dd>${gejuName(x.geju)}</dd>
+      <dt>用神</dt><dd>${yongEl !== null ? wxB(yongEl) + '　' : ''}${x.how}</dd>
+      ${x.tiaohou ? `<dt>调候</dt><dd>${x.tiaohouUsed ? `生于${n.zhi[1]}月，以调候为急，取${x.tiaohouUsed}为喜` : `《穷通宝鉴》此月宜${[...x.tiaohou].join('、')}；春秋以扶抑为主`}</dd>` : ''}
+      <dt>喜</dt><dd><span class="badge good">喜</span>　${st.xi.map(wxB).join('　')}</dd>
+      <dt>忌</dt><dd><span class="badge bad">忌</span>　${st.ji.map(wxB).join('　')}</dd>
+    </dl>
+    <div class="relh">五行力量</div>
+    <div class="bars">${P.WX.map((w,i) => `<div class="bar"><span class="el" style="color:${wxc(i)}">${w}</span><div class="track"><div class="fill" style="width:${Math.round(pw.wx[i]*100)}%;background:${wxc(i)}"></div></div><span class="st">${Math.round(pw.wx[i]*100)}%</span></div>`).join('')}</div>
+    <div class="relh">十神力量</div>
+    <div class="bars ss">${pw.ss.map(([s, v]) => `<div class="bar"><span class="el">${t(s)}</span><div class="track"><div class="fill" style="width:${Math.round(v*100)}%;background:var(--accent)"></div></div><span class="st">${Math.round(v*100)}%</span></div>`).join('')}</div>
+    <div class="note">力量按天干、地支藏干加权计算（本气 1、中气 0.5、余气 0.3），月令加倍。</div>
+  </section>
+  <section class="card span2">
+    <div class="card-h"><h2>大运</h2><span class="sub">${n.dayun ? n.yunStart : '填写性别后显示'}</span></div>
+    ${dys.length ? `<div class="dygrid">${dys.map((d, i) => { const gz = d.getGanZhi();
+      return `<button class="dy ${i === curDy ? 'cur' : ''} ${i === selDy ? 'sel' : ''}" data-dy="${i}"><b>${ganC(gz[0])}${zhiC(gz[1])}</b><span>${P.shiShen(n.dayGan, gz[0])}·${ssZ(gz[1])}</span><span>${d.getStartYear()}–${d.getEndYear()}</span><span class="muted">${n.yunAge[0] + i * 10}–${n.yunAge[0] + i * 10 + 9}岁</span></button>`; }).join('')}</div>
+    <div class="relh">${dySel.getGanZhi()}运的流年</div>
+    <div class="lngrid">${dySel.getLiuNian().map(y => { const gz = y.getGanZhi();
+      return `<div class="${y.getYear() === curY ? 'cur' : ''}"><span>${y.getYear()}</span><b>${ganC(gz[0])}${zhiC(gz[1])}</b><span>${P.shiShen(n.dayGan, gz[0])}</span><span class="muted">${y.getYear() - by}岁</span></div>`; }).join('')}</div>
+    <div class="note">按《三命通会》「三日折一岁」推算交运时间，岁数为周岁（不进位）。有些命盘把零头进一岁，所以会多写一岁。</div>` : '<p class="muted" style="margin:0">选择性别后即可排出大运。</p>'}
+  </section>
+  <section class="card">
+    <div class="card-h"><h2>流年流月</h2><span class="sub ynav"><button class="iconbtn sm" data-ny="-1" aria-label="上一年">‹</button>${natalYear}<button class="iconbtn sm" data-ny="1" aria-label="下一年">›</button></span></div>
+    <dl class="kv">
+      <dt>流年</dt><dd><b class="serif">${ganC(lyGz[0])}${zhiC(lyz)}年</b>　天干${t(P.shiShen(n.dayGan, lyGz[0]))}，地支${t(ssZ(lyz))}</dd>
+      <dt>太岁</dt><dd>${taiSui.length ? taiSui.map(x => `<span class="badge bad">${x}</span>`).join(' ') : '<span class="muted">没有冲犯太岁</span>'}</dd>
+    </dl>
+    <div class="lygrid">${months.map(m => { const r = zhiRelOf(m.zhi, n.zhi[2]).find(r => r.t === '冲' || r.t === '六合' || r.t === '三合');
+      return `<div><span class="mn">${MONTH_CN[m.i]}月</span><b>${ganC(m.gz[0])}${zhiC(m.gz[1])}</b><span>${P.shiShen(n.dayGan, m.gz[0])}</span><span class="muted">${m.start.getMonth()}/${m.start.getDay()} 起</span>${r ? `<span class="tag ${r.bad ? 'bad' : 'good'}">${r.t === '冲' ? '冲日柱' : '合日柱'}</span>` : ''}</div>`; }).join('')}</div>
+    <div class="note">流月以节气交接为准（例如立春起正月）。「冲日柱」「合日柱」指那个月和你日柱的关系。</div>
+  </section>
+  ${gua ? `<section class="card">
+    <div class="card-h"><h2>本命吉凶方位</h2><span class="sub">${gua.name}卦（${gua.star}）· ${gua.group}</span></div>
+    <div class="jg">${['西北','正北','东北','正西','中','正东','西南','正南','东南'].map(p => {
+      if (p === '中') return `<div class="c mid"><b>${gua.name}</b><span class="d">${gua.group}</span></div>`;
+      const d = p.replace('正',''), i = gua.dirs.indexOf(d), good = i < 4;
+      return `<div class="c ${good ? 'good' : 'bad'}"><span class="d">${p}</span><span class="g" style="color:var(--${good ? 'good' : 'bad'})">${t(BAZHAI_N[i], BAZHAI_N[i], '八宅')}</span></div>`; }).join('')}</div>
+    <div class="note">按出生年（立春为界）和性别推算的本命卦。四吉方适合作睡床、书桌、大门的朝向；四凶方宜避开。</div>
+  </section>` : ''}`;
 }
-
-function todayCard(n, l, wx){
-  const t = P.today(n, l, wx.wang);
-  const good = t.sha.filter(s => !BAD_SHA.includes(s));
-  const badR = t.rels.filter(r => r.bad);
-  const wxTxt = t.wxScore > 0 ? '今日干支五行是你的喜用，做事较顺' : t.wxScore < 0 ? '今日干支五行属你的忌神，凡事多留余地' : '今日五行对你喜忌参半';
-  const dh = P.dayHours(n, l);
-  const best = dh.best.map(h=>h.zhi+'时'), avoid = dh.avoid.map(h=>h.zhi+'时');
-  const parts = [`今天是你的<b>${t.ss}日</b>`];
-  if (good.length) parts.push(`${good.join('、')}到位`);
-  parts.push(wxTxt);
-  if (badR.length) parts.push(`留意今日${badR.map(r=>r.t+'你的'+r.where.replace(/（.*）/,'')).join('、')}`);
-  if (best.length) parts.push(`对你较好的时辰：${best.join('、')}`);
-  if (avoid.length) parts.push(`尽量避开：${avoid.join('、')}`);
-  const stars = `<span>${'★'.repeat(t.stars)}</span><span class="off">${'★'.repeat(5-t.stars)}</span>`;
-  return `<section class="card you">
-    <div class="head"><div class="title">${t.gz}日 · 你的<em>${t.ss}日</em></div><div><span class="stars" title="综合参考分">${stars}</span> ${chkBtn('个人今日')}</div></div>
-    <div class="desc">${P.SS_DESC[t.ss]}<span class="muted">（地支${t.dz}对你为${t.ssZ}）</span></div>
-    <div class="summary">${parts.join('；')}。</div>
-    <div class="grid2" style="gap:24px">
-      <dl class="kv">
-        <dt>与本命</dt><dd class="tags">${t.rels.map(r=>`<span class="tag ${r.bad?'bad':'good'}" title="${esc(r.where)}">${r.t} · ${r.where.replace(/（.*）/,'')}</span>`).join('')||'<span class="muted">无明显冲合</span>'}</dd>
-        <dt>引动神煞</dt><dd>${t.sha.length?`<div class="tags">${t.sha.map(s=>`<span class="tag ${BAD_SHA.includes(s)?'bad':'good'}">${s}</span>`).join('')}</div><ul class="shalist">${t.sha.map(s=>`<li>${P.SHA_DESC[s]}</li>`).join('')}</ul>`:'<span class="muted">无</span>'}</dd>
-      </dl>
-      <dl class="kv">
-        <dt>今日五行</dt><dd>${ganC(t.dg)}${zhiC(t.dz)}（${t.dayWx.map(i=>P.WX[i]).join('')}）　${t.wxScore>0?'<span class="tag good">喜</span>':t.wxScore<0?'<span class="tag bad">忌</span>':'<span class="tag">平</span>'}</dd>
-        <dt>当旺五行</dt><dd>${wx.wang}旺　${t.wangGood?'<span class="tag good">对你有利</span>':'<span class="tag bad">对你不利</span>'}</dd>
-        <dt>流年</dt><dd>${t.ly}（${t.lySS}）${t.ty.length?`　<span class="tag bad">${t.ty.join('、')}</span>`:''}</dd>
-        ${t.dy?`<dt>大运</dt><dd>${t.dy.getGanZhi()}（${P.shiShen(n.dayGan,t.dy.getGanZhi()[0])}运，${t.dy.getStartYear()}–${t.dy.getEndYear()}）</dd>`:''}
-      </dl>
-    </div>
-    <div class="note">星级为规则加总的参考分，不是定论。</div>
-  </section>`;
-}
-
+const zhiRelOf = (a, b) => P.zhiRelPublic ? P.zhiRelPublic(a, b) : [];
 function renderMe(){
-  $('natal').innerHTML = profile ? natalCard(P.build(profile))
-    : `<section class="card empty"><div class="serif">尚未输入生辰</div>填写出生日期后，即可看到四柱八字、五行喜忌、命带神煞与大运。</section>`;
+  $('natal').innerHTML = profile ? natalCard(P.build(profile)) : `<section class="card empty"><div class="serif" style="font-size:19px;color:var(--ink)">尚未输入生辰</div>填写出生日期后，即可看到四柱八字、五行喜忌、命带神煞与大运。</section>`;
 }
 
+// ---------- 名词解释 ----------
+const FACTOR_CATS = ['时家神煞','个人神煞'];               // 显示建议，但与当天实际宜忌对照
+const MEANING_ONLY = ['黄道黑道','建除十二值','吉神','凶煞']; // 只显示「是什么」，宜忌以宜忌栏为准
+const YJ_WORDS = () => window.__yjw || (window.__yjw = new Set(Object.entries(window.GLOSS || {}).filter(([k,v]) => v.some(e => e.cat === '宜忌用语')).map(([k]) => k)));
+// 把「宜A、B；忌C」里的宜忌用语找出来，与当天实际宜忌对照；冲突的词划线并说明
+function reconcile(use, ctx){
+  if (!ctx || !use) return { html: esc(use || ''), conflicts: [] };
+  const words = YJ_WORDS(), conflicts = [];
+  const html = esc(use).replace(/(宜|忌)([^；;。]*)/g, (m, kind, rest) => kind + rest.split(/([、，,])/).map(w => {
+    const x = w.trim(); if (!words.has(x)) return w;
+    const clash = kind === '忌' ? ctx.yi.has(x) : ctx.ji.has(x);
+    if (!clash) return w;
+    conflicts.push({ word: x, actual: kind === '忌' ? '宜' : '忌' });
+    return `<s class="clash">${w}</s>`;
+  }).join(''));
+  return { html, conflicts };
+}
+function openTerm(key, ctx, cat){
+  if (key === '冲煞' && window.DAY_CHONG) {
+    const c = window.DAY_CHONG, gz = (c.full.match(/[（(]([^)）]+)[)）]/) || [])[1] || '';
+    $('sheet').innerHTML = `<div class="grab"></div><button class="iconbtn close" id="sheetClose" aria-label="关闭">×</button>
+      <h3 id="sheetTitle">冲煞</h3>
+      <div class="entry"><span class="cat">今天</span>
+        <p><b>冲${esc(c.sx)}</b>：今天冲属${esc(c.sx)}的人${gz ? `，${esc(gz)}年出生的被冲得最重（天克地冲）` : ''}。属${esc(c.sx)}的人今天办大事宜谨慎。</p>
+        <p><b>煞${esc(c.sha)}</b>：今天三煞在${esc(c.sha)}方，避免朝这个方向动土、修造、搬动大件。</p></div>
+`;
+    $('sheet').hidden = false; $('sheetBack').hidden = false; $('sheetClose').onclick = closeTerm; $('sheetClose').focus(); return;
+  }
+  // 合并「一般倾向」相同的词条（如天刑同时属黄道黑道与凶煞），类别并列
+  const es = [];
+  let all = (window.GLOSS && GLOSS[key]) || [];
+  if (cat && all.some(e => e.cat === cat)) all = all.filter(e => e.cat === cat);
+  all.forEach(e => { const same = es.find(x => x.use && x.use === e.use); if (same) { same.cat += ' · ' + e.cat; if (e.mean.length > same.mean.length) same.mean = e.mean; } else es.push({ ...e }); });
+  const body = es.map(e => {
+    if (e.cat === '本命日') return `<div class="entry"><p>${esc(e.use)}</p></div>`;   // 本命日只给建议
+    if (MEANING_ONLY.some(c => e.cat.includes(c))) return `<div class="entry"><span class="cat">${esc(e.cat)}</span><p>${esc(e.mean)}</p></div>`;
+    const factor = FACTOR_CATS.some(c => e.cat.includes(c));
+    const r = factor ? reconcile(e.use, ctx) : { html: esc(e.use || ''), conflicts: [] };
+    const note = r.conflicts.length ? `<p class="ctxnote">${ctx.label}实际${r.conflicts.map(c => `<b>${c.actual}${esc(c.word)}</b>`).join('、')}。通胜的宜忌是综合当天所有神煞后的结论，单一神煞的倾向可能被其他吉神化解或被凶煞加重，<b>以宜忌栏为准</b>。</p>` : '';
+    return `<div class="entry"><span class="cat">${esc(e.cat)}</span><p>${esc(e.mean)}</p>${e.use ? `<p class="use">${factor ? '<span class="muted">建议：</span>' : ''}${r.html}</p>` : ''}${note}</div>`;
+  }).join('');
+  $('sheet').innerHTML = `<div class="grab"></div><button class="iconbtn close" id="sheetClose" aria-label="关闭">×</button>
+    <h3 id="sheetTitle">${esc(key)}</h3>${body || '<p class="muted">暂无解释。</p>'}${es.some(e => MEANING_ONLY.some(c => e.cat.includes(c))) ? '<p class="note">当天能做什么，以「宜忌」为准。</p>' : ''}`;
+  $('sheet').hidden = false; $('sheetBack').hidden = false; $('sheetClose').onclick = closeTerm; $('sheetClose').focus();
+}
+function closeTerm(){ $('sheet').hidden = true; $('sheetBack').hidden = true; }
+$('sheetBack').onclick = closeTerm;
+
+
+// ---------- 择日：按「宜忌」筛出适合某件事的日子；可再按日期、星期、星级、建除、要避开的日子筛选 ----------
+// 大分类 → 事件（白话名称 → 通书原名）
+const CATS = [
+  ['婚嫁', [['结婚',['嫁娶']], ['订婚 / 提亲',['纳采','订盟']], ['安床',['安床']], ['入赘',['纳婿']], ['回门',['归宁']]]],
+  ['家宅', [['搬家 / 入伙',['入宅','移徙']], ['装修 / 动工',['动土','修造']], ['上梁',['上梁']], ['安门',['安门']], ['装灶 / 安炉',['作灶']], ['拆卸 / 拆房',['拆卸']],
+            ['大扫除',['扫舍']], ['买房 / 置业',['置产']], ['盖房',['盖屋']], ['打地基',['起基','定磉']], ['挖井',['掘井']]]],
+  ['生意财运', [['开业 / 开张',['开市']], ['签约 / 交易',['立券','交易']], ['求财 / 收款',['纳财']], ['挂招牌',['挂匾']], ['出货',['出货财']], ['开仓',['开仓']], ['安装机器',['安机械']], ['请人 / 雇佣',['雇佣']]]],
+  ['工作学业', [['上任 / 入职',['赴任']], ['入学',['入学']], ['学艺 / 拜师',['习艺']]]],
+  ['出行社交', [['出行 / 旅游',['出行']], ['会亲友 / 聚会',['会亲友']]]],
+  ['健康', [['看病 / 求医',['求医','治病']], ['针灸',['针灸']], ['理发',['理发']], ['修甲',['整手足甲']], ['沐浴',['沐浴']], ['做新衣',['裁衣']]]],
+  ['信仰祭祀', [['祭祀 / 拜神',['祭祀']], ['祈福',['祈福']], ['开光',['开光']], ['求子',['求嗣']], ['安神位',['安香']], ['法会 / 打醮',['斋醮']], ['解除 / 化解',['解除']]]],
+  ['丧葬', [['安葬',['安葬']], ['入殓',['入殓']], ['破土（墓地）',['破土']], ['移灵',['移柩']], ['捡骨 / 迁葬',['启钻']], ['立碑',['立碑']], ['修坟',['修坟']], ['穿孝服',['成服']], ['除孝服',['除服']]]],
+];
+const ACTS = CATS.flatMap(([c, evs]) => evs.map(([a, ts]) => [a, ts, c]));
+// 「更多选项」：通书全部宜项，按大方向分组（括号内是对应的白话事件）
+const RAW_CATS = [
+  ['婚嫁', '嫁娶 纳采 订盟 问名 纳婿 归宁 安床 合帐 冠笄'],
+  ['家宅', '入宅 移徙 出火 进人口 动土 修造 起基 定磉 竖柱 上梁 作梁 合脊 开柱眼 架马 盖屋 安门 修门 作灶 安碓磑 拆卸 坏垣 破屋 修饰垣墙 补垣 塞穴 断蚁 扫舍 掘井 开池 开渠 放水 开厕 造仓 置产 谢土 平治道涂 筑堤 造桥 伐木'],
+  ['生意财运', '开市 交易 立券 纳财 挂匾 出货财 开仓 安机械 雇佣 造车器 造船'],
+  ['工作学业', '赴任 入学 习艺'],
+  ['出行社交', '出行 会亲友'],
+  ['健康', '求医 治病 针灸 经络 理发 整手足甲 沐浴 裁衣'],
+  ['信仰祭祀', '祭祀 祈福 开光 求嗣 安香 斋醮 解除 酬神 塑绘 雕刻 造庙 普渡 归岫'],
+  ['丧葬', '安葬 入殓 破土 移柩 启钻 立碑 修坟 成服 除服 开生坟 合寿木'],
+  ['农林牧渔', '栽种 纳畜 牧养 造畜稠 教牛马 畋猎 捕捉 取渔 结网 割蜜'],
+].map(([c, ts]) => [c, ts.split(' ')]);
+const PLAIN_OF = {}; ACTS.forEach(([a, ts]) => ts.forEach(x => { if (a !== x) PLAIN_OF[x] = a; }));   // 白话名和原名一样的不加括号
+const JIANCHU = '建除满平定执破危成收开闭'.split('');
+const LENS = [[30,'1个月'],[91,'3个月'],[182,'半年'],[365,'1年']];
+const DE_SHEN = ['天德','月德','天德合','月德合','天赦','天恩'];
+// 要避开的日子：通书的（人人相同）和按你八字的
+const YANGGONG = {1:[13], 2:[11], 3:[9], 4:[7], 5:[5], 6:[3], 7:[1,29], 8:[27], 9:[25], 10:[23], 11:[21], 12:[19]};   // 杨公十三忌（农历）
+const AVOID_GEN = [
+  ['月破日', '一个月里最冲的一天，大事不宜', (l, xs) => xs.includes('月破')],
+  ['杨公忌日', '民间相传一年十三个诸事不宜的日子', (l) => (YANGGONG[Math.abs(l.getMonth())] || []).includes(l.getDay())],
+  ['四离四绝', '换季的前一天（二分二至、四立之前），气场交替', (l, xs, dt) => { const q = Solar.fromDate(new Date(dt.getTime() + 864e5)).getLunar().getJieQi(); return ['春分','秋分','夏至','冬至','立春','立夏','立秋','立冬'].includes(q); }],
+  ['黑道日', '当天值日的神属凶', (l) => l.getDayTianShenLuck() !== '吉'],
+  ['四废日', '当季五行最弱的日子，做事难成', (l, xs) => xs.includes('四废')],
+  ['往亡日', '忌出行、搬家、上任', (l, xs) => xs.includes('往亡')],
+  ['归忌日', '忌出远门回家、搬家', (l, xs) => xs.includes('归忌')],
+];
+const AVOID_ME = [
+  ['冲我生肖', '和你的生肖相冲，大事不宜', tt => tt.badAll.includes('冲生肖日') || tt.badAll.includes('天克地冲日')],
+  ['冲我日柱', '冲到你自己和伴侣，容易情绪起伏、感情摩擦', tt => tt.badAll.includes('冲本命日')],
+  ['三杀日', '对你的生肖不利，忌动土、搬家、开业', tt => tt.badAll.includes('三杀日')],
+  ['三刑日', '和你的生肖相刑，容易有是非、摩擦', tt => tt.badAll.includes('三刑日')],
+  ['我的空亡日', '事情容易落空、拖延', tt => tt.sha.includes('空亡')],
+];
+const AVOID_REC = ['冲我生肖','冲我日柱','三杀日','月破日','杨公忌日'];   // 推荐设置
+const today12 = () => { const d = new Date(); d.setHours(12,0,0,0); return d; };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+let pick = (() => { const d = {cat:'家宅', act:'搬家 / 入伙', term:'', wd:[], minStar:0, jc:[], avoid:[...AVOID_REC], sort:'date'};
+  let p; try { p = {...d, ...JSON.parse(localStorage.getItem('ts-pick') || '{}')}; } catch(e) { p = d; }
+  if (!ACTS.some(a => a[0] === p.act)) p.act = d.act;
+  if (!CATS.some(c => c[0] === p.cat) && !RAW_CATS.some(c => c[0] === p.cat)) p.cat = d.cat;
+  ['wd','jc','avoid'].forEach(k => { if (!Array.isArray(p[k])) p[k] = d[k]; });
+  return p; })();
+let pickStart = today12(), pickEnd = addDays(pickStart, 91), moreOpen = false;
+const savePick = () => { try { const {cat, act, term, wd, minStar, jc, avoid, sort} = pick; localStorage.setItem('ts-pick', JSON.stringify({cat, act, term, wd, minStar, jc, avoid, sort})); } catch(e) {} };
+const pickTerms = () => pick.term ? [pick.term] : (ACTS.find(a => a[0] === pick.act) || ACTS[0])[1];
+const pressed = on => `aria-pressed="${on ? 'true' : 'false'}"`;
+const toggleIn = (arr, x) => arr.includes(x) ? arr.filter(y => y !== x) : [...arr, x];
+const WD_ORDER = [1,2,3,4,5,6,0];   // 一 … 日
+
+function dateSel(p, d){
+  const y0 = new Date().getFullYear(), dim = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const sel = (id, from, to, v, f) => `<select id="${id}">${Array.from({length: to - from + 1}, (_, i) => from + i).map(x => `<option value="${x}" ${x === v ? 'selected' : ''}>${f(x)}</option>`).join('')}</select>`;
+  return `<div class="selrow">${sel(p + 'Y', y0 - 1, y0 + 3, d.getFullYear(), x => x + '年')}${sel(p + 'M', 1, 12, d.getMonth() + 1, x => x + '月')}${sel(p + 'D', 1, dim, d.getDate(), x => x + '日')}</div>`;
+}
+
+// 「有 N 天」：这段时间里（其他条件都符合的日子中）属于这一项的天数；打勾后变成「已去掉 N 天」
+const avoidRow = ([x, desc], cnt) => { const on = pick.avoid.includes(x), n = cnt[x] || 0;
+  return `<button class="avi" data-avoid="${x}" ${pressed(on)}><span class="box" aria-hidden="true"></span><span class="avt"><b>${x}</b><small>${desc}</small></span><span class="avn">${n ? (on ? `已去掉 ${n} 天` : `有 ${n} 天`) : '没有'}</span></button>`; };
+function pickForm(me, cnt){
+  const span = Math.round((pickEnd - pickStart) / 864e5);
+  const evs = (CATS.find(c => c[0] === pick.cat) || [null, []])[1];
+  const avail = [...(me ? AVOID_ME : []), ...AVOID_GEN].map(a => a[0]), on = avail.filter(x => pick.avoid.includes(x)), rec = AVOID_REC.filter(x => avail.includes(x));
+  const isRec = on.length === rec.length && rec.every(x => on.includes(x));
+  let no = 0; const H = (t, hint = '') => `<h3 class="pk-h"><span class="n">${++no}</span>${t}${hint ? `<small>${hint}</small>` : ''}</h3>`;
+  return `<section class="card">
+    <div class="card-h"><h2>择日</h2></div>
+    <div class="pk-sec field first">${H('想做什么')}
+      <div class="opts">${CATS.map(([c]) => `<button class="cat" data-cat="${c}" ${pressed(pick.cat === c)}>${c}</button>`).join('')}</div>
+      ${evs.length ? `<div class="evbox"><div class="opts">${evs.map(([a]) => `<button class="opt" data-act="${a}" ${pressed(!pick.term && pick.act === a)}>${a}</button>`).join('')}</div></div>` : ''}
+      <button class="more-btn" data-more="1" aria-expanded="${moreOpen}"><span>${moreOpen ? '收起全部事项' : pick.term ? `已选：${pick.term}${PLAIN_OF[pick.term] ? `（${PLAIN_OF[pick.term]}）` : ''}` : `找不到要做的事？查看全部 ${RAW_CATS.reduce((a, c) => a + c[1].length, 0)} 项`}</span><span class="chev" aria-hidden="true"></span></button>
+      ${moreOpen ? `<div class="more-panel">${RAW_CATS.map(([c, ts]) => `<div class="more-g"><div class="more-h">${c}</div><div class="opts">${ts.map(x => `<button class="opt" data-term="${x}" ${pressed(pick.term === x)}>${x}${PLAIN_OF[x] ? `<small>（${PLAIN_OF[x]}）</small>` : ''}</button>`).join('')}</div></div>`).join('')}</div>` : ''}
+    </div>
+    <div class="pk-sec field">${H('日期')}
+      <div class="pk-range"><span class="muted">从</span>${dateSel('pkS', pickStart)}</div>
+      <div class="pk-range"><span class="muted">到</span>${dateSel('pkE', pickEnd)}</div>
+      <div class="opts" style="margin-top:8px">${LENS.map(([n, t]) => `<button class="opt" data-len="${n}" ${pressed(span === n)}>${t}</button>`).join('')}</div>
+    </div>
+    <div class="pk-sec">${H('星期', '可多选，不选＝不限')}
+      <div class="opts">${WD_ORDER.map(w => `<button class="opt sq" data-wd="${w}" ${pressed(pick.wd.includes(w))}>${WEEK[w]}</button>`).join('')}
+        <button class="opt" data-wdset="we" ${pressed(pick.wd.length === 2 && pick.wd.includes(0) && pick.wd.includes(6))}>周末</button>${pick.wd.length ? '<button class="opt" data-wdset="none">不限</button>' : ''}</div>
+    </div>
+    ${me ? `<div class="pk-sec">${H('对我的星级')}
+      <div class="opts">${[[0,'不限'],[3,'★★★ 以上'],[4,'★★★★ 以上'],[5,'★★★★★']].map(([n, t]) => `<button class="opt" data-star="${n}" ${pressed(pick.minStar === n)}>${t}</button>`).join('')}</div>
+    </div>` : ''}
+    <div class="pk-sec">${H('建除十二值', '可多选，不选＝不限')}
+      <div class="opts">${JIANCHU.map(x => `<button class="opt sq" data-jc="${x}" ${pressed(pick.jc.includes(x))}>${x}</button>`).join('')}</div>
+      ${pick.jc.length ? '<div class="opts" style="margin-top:8px"><button class="opt" data-jcset="none">不限</button></div>' : ''}
+    </div>
+    <div class="pk-sec">${H('避开这些日子', '打勾＝不要列出')}
+      ${me ? `<div class="pk-sub">对你不利的日子（按你的八字）</div><div class="avl">${AVOID_ME.map(a => avoidRow(a, cnt)).join('')}</div>` : ''}
+      <div class="pk-sub">通书的凶日</div><div class="avl">${AVOID_GEN.map(a => avoidRow(a, cnt)).join('')}</div>
+      <div class="opts" style="margin-top:10px"><button class="opt" data-avset="rec" ${pressed(isRec)}>推荐设置</button><button class="opt" data-avset="none">都不避开</button></div>
+      ${me ? '' : `<p class="note">输入你的生辰后，还可以避开冲你、三杀等对你不利的日子，并按你的八字评分排序。</p><button class="btn" data-goto="me">设置我的命盘</button>`}
+    </div>
+  </section>`;
+}
+
+function pickDays(me){
+  const terms = pickTerms(), out = [], cnt = {};
+  for (let dt = new Date(pickStart); dt <= pickEnd; dt = addDays(dt, 1)) {
+    if (pick.wd.length && !pick.wd.includes(dt.getDay())) continue;
+    const l = Solar.fromDate(dt).getLunar(), yi = l.getDayYi(), ji = l.getDayJi();
+    if (!terms.some(x => yi.includes(x)) || terms.some(x => ji.includes(x))) continue;   // 宜里有、忌里没有
+    if (pick.jc.length && !pick.jc.includes(l.getZhiXing())) continue;
+    const xs = l.getDayXiongSha();
+    let tt = null, dh = null;
+    if (me) { tt = P.today(me, l, wangXiang(dt).wang); if (pick.minStar && tt.stars < pick.minStar) continue; }
+    const hits = [...AVOID_GEN.filter(([, , f]) => f(l, xs, dt)), ...(tt ? AVOID_ME.filter(([, , f]) => f(tt)) : [])].map(a => a[0]);
+    hits.forEach(x => { cnt[x] = (cnt[x] || 0) + 1; });
+    if (hits.some(x => pick.avoid.includes(x))) continue;
+    if (me) dh = P.dayHours(me, l);
+    // 适合做这件事的时辰：时辰的宜里有这件事，且不是黑道、日破、诸事不宜；有八字时再去掉对你「慎用」的
+    const times = l.getTimes().slice(0, 12), hd = l.getDayTianShenLuck() === '吉';
+    const okH = (h, k) => h.getTianShenLuck() === '吉' && !P.hourSha(l, h).some(([x]) => x === '日破') && !h.getJi().includes('诸事不宜') && !(dh && dh.hours[k].level === '慎用');
+    let hours = times.filter((h, k) => okH(h, k) && terms.some(x => h.getYi().includes(x)));
+    if (!hours.length) hours = times.filter(okH);
+    const de = l.getDayJiShen().filter(x => DE_SHEN.includes(x));
+    out.push({dt: new Date(dt), l, hd, de, tt, hours: hours.map(h => h.getZhi()), score: (tt ? tt.stars * 2 : 6) + (hd ? 1 : 0) + de.length * .5});
+  }
+  return {rs: out, cnt};
+}
+
+function pickRow(r){
+  const {dt, l} = r, we = dt.getDay() === 0 || dt.getDay() === 6;
+  const stars = r.tt ? `<span class="stars">${'★'.repeat(r.tt.stars)}<span class="off">${'★'.repeat(5 - r.tt.stars)}</span></span>` : '';
+  return `<button class="pk-row" data-day="${ymd(dt)}">
+    <span class="pk-date ${we ? 'we' : ''}"><b>${dt.getMonth() + 1}月${dt.getDate()}日</b><span>周${WEEK[dt.getDay()]}</span></span>
+    <span class="pk-main"><span class="pk-l1"><span class="nw">农历${l.getMonthInChinese()}月${l.getDayInChinese()} · ${l.getDayInGanZhi()}日</span> <span class="badge brand">${l.getZhiXing()}日</span><span class="badge brand">${l.getDayTianShen()}</span></span>
+      <span class="pk-l2">${r.hours.length ? `吉时：${r.hours.map(z => z + '时').join('、')}` : '当天没有特别好的时辰'}${r.de.length ? `　吉神：${r.de.join('、')}` : ''}</span>${r.tt ? `<span class="pk-l2">${r.tt.tags.map(x => `<b style="color:var(--${x.bad ? 'bad' : x.mid ? 'muted' : 'good'})">${x.t}</b>`).join('、')}</span>` : ''}</span>
+    <span class="pk-side">${stars}</span>
+  </button>`;
+}
+
+function renderPick(){
+  const me = profile ? P.build(profile) : null, {rs, cnt} = pickDays(me), terms = pickTerms(), name = pick.term ? (PLAIN_OF[pick.term] ? `${pick.term}（${PLAIN_OF[pick.term]}）` : pick.term) : pick.act;
+  const avoids = [...(me ? AVOID_ME : []), ...AVOID_GEN].map(a => a[0]).filter(x => pick.avoid.includes(x));
+  const cond = [pick.wd.length && `只看星期${WD_ORDER.filter(w => pick.wd.includes(w)).map(w => WEEK[w]).join('、')}`, me && pick.minStar && `对你 ${'★'.repeat(pick.minStar)} 以上`,
+                pick.jc.length && `建除只看${JIANCHU.filter(x => pick.jc.includes(x)).join('、')}日`, avoids.length && `已避开${avoids.join('、')}`].filter(Boolean);
+  let list;
+  if (!rs.length) list = `<p class="pk-empty">这段时间没有找到适合「${esc(name)}」的日子。可以把日期拉长，或少选几个条件。</p>`;
+  else if (pick.sort === 'best') list = [...rs].sort((a, b) => b.score - a.score || a.dt - b.dt).map(pickRow).join('');
+  else { let m = ''; list = rs.map(r => { const k = `${r.dt.getFullYear()}年${r.dt.getMonth() + 1}月`, h = k !== m ? `<div class="pk-month">${k}</div>` : ''; m = k; return h + pickRow(r); }).join(''); }
+  $('viewPick').innerHTML = pickForm(me, cnt) + `<section class="card">
+    <div class="card-h"><h2>找到 ${rs.length} 天</h2><span class="sub">${ymd(pickStart)} 至 ${ymd(pickEnd)}</span></div>
+    <p class="note" style="margin:-4px 0 12px">适合「${esc(name)}」${pick.term ? '' : `（通书写作：${terms.join('、')}）`}的日子${cond.length ? '；' + cond.join('，') : ''}。点日子可看当天详细。</p>
+    ${rs.length > 1 ? `<div class="pk-sort"><button class="opt" data-sort="date" ${pressed(pick.sort !== 'best')}>按日期</button><button class="opt" data-sort="best" ${pressed(pick.sort === 'best')}>${me ? '按对我推荐' : '按推荐'}</button></div>` : ''}
+    ${list}
+  </section>`;
+}
+
+$('viewPick').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const d = b.dataset;
+  if (d.cat) { pick.cat = d.cat; pick.act = (CATS.find(c => c[0] === pick.cat) || CATS[0])[1][0][0]; pick.term = ''; }
+  else if (d.act) { pick.act = d.act; pick.term = ''; }
+  else if (d.more) { moreOpen = !moreOpen; renderPick(); return; }
+  else if (d.term) { pick.term = d.term; pick.cat = (RAW_CATS.find(([, ts]) => ts.includes(d.term)) || [pick.cat])[0]; moreOpen = false; }
+  else if (d.len) pickEnd = addDays(pickStart, +d.len);
+  else if (d.wd) pick.wd = toggleIn(pick.wd, +d.wd);
+  else if (d.wdset) pick.wd = d.wdset === 'we' ? [6, 0] : [];
+  else if (d.star !== undefined) pick.minStar = +d.star;
+  else if (d.jc) pick.jc = toggleIn(pick.jc, d.jc);
+  else if (d.jcset) pick.jc = [];
+  else if (d.avoid) pick.avoid = toggleIn(pick.avoid, d.avoid);
+  else if (d.avset) pick.avoid = d.avset === 'rec' ? [...AVOID_REC] : [];
+  else if (d.sort) pick.sort = d.sort;
+  else if (d.day) { const [y, m, dd] = d.day.split('-').map(Number); cur = new Date(y, m - 1, dd, 12); openHour = null; setTab('today'); return; }
+  else return;
+  savePick(); renderPick();
+});
+$('viewPick').addEventListener('change', e => {
+  const id = e.target.id;
+  if (/^pk[SE][YMD]$/.test(id)) {
+    const p = id.slice(0, 3), y = +$(p + 'Y').value, m = +$(p + 'M').value, dim = new Date(y, m, 0).getDate(), d = new Date(y, m - 1, Math.min(+$(p + 'D').value, dim), 12);
+    if (p === 'pkS') { const span = pickEnd - pickStart; pickStart = d; if (pickEnd < pickStart) pickEnd = new Date(pickStart.getTime() + span); }
+    else pickEnd = d < pickStart ? new Date(pickStart) : d;
+    if (pickEnd - pickStart > 3 * 366 * 864e5) pickEnd = addDays(pickStart, 3 * 366);   // 最多三年
+  } else return;
+  savePick(); renderPick();
+});
+
+// ---------- 页面切换 ----------
 function render(){
-  $('dateLabel').textContent = `${cur.getFullYear()}年${cur.getMonth()+1}月${cur.getDate()}日 · 星期${WEEK[cur.getDay()]}`;
-  $('viewToday').hidden = tab !== 'today';
-  $('datebar').hidden = tab !== 'today';
-  $('viewMe').hidden = tab !== 'me';
-  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab));
-  if (tab === 'today') renderToday(); else renderMe();
+  $('dateLabel').textContent = isDesktop() ? `${cur.getFullYear()}年${cur.getMonth()+1}月${cur.getDate()}日 · 星期${WEEK[cur.getDay()]}` : `${cur.getMonth()+1}月${cur.getDate()}日 · 周${WEEK[cur.getDay()]}`;
+  document.body.dataset.tab = tab;
+  document.querySelectorAll('[data-tab]').forEach(b => { if (b.tagName === 'BUTTON') b.setAttribute('aria-selected', b.dataset.tab === tab || (tab === 'hours' && b.dataset.tab === 'today' && isDesktop())); });
+  if (tab === 'me') renderMe(); else if (tab === 'pick') renderPick(); else renderToday();
 }
-
-function setTab(t){ tab = t; history.replaceState(null, '', location.search + (t==='me' ? '#me' : '')); render(); window.scrollTo({top:0}); }
-function shift(n){ cur.setDate(cur.getDate()+n); render(); }
-
-document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+function setTab(x){ tab = x; history.replaceState(null, '', location.search + (x === 'me' ? '#me' : x === 'hours' ? '#hours' : x === 'pick' ? '#pick' : '')); render(); window.scrollTo({top:0}); }
+function shift(n){ cur.setDate(cur.getDate()+n); openHour = null; render(); }
+document.querySelectorAll('button[data-tab]').forEach(b => b.onclick = () => setTab(b.dataset.tab));
 $('prev').onclick = () => shift(-1);
 $('next').onclick = () => shift(1);
-$('today').onclick = () => { cur = new Date(); cur.setHours(12,0,0,0); render(); };
-// ---------- 自制日历（不依赖浏览器原生日期选择器，微信/WhatsApp 内置浏览器也能用） ----------
+$('today').onclick = () => { cur = new Date(); cur.setHours(12,0,0,0); openHour = null; render(); };
+const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+function paintThemeBtn(){ const dark = document.documentElement.dataset.theme === 'dark'; $('themeBtn').innerHTML = dark ? ICON_SUN : ICON_MOON; $('themeBtn').title = dark ? '切换浅色' : '切换深色'; }
+$('themeBtn').onclick = () => { const dark = document.documentElement.dataset.theme !== 'dark'; if (dark) document.documentElement.dataset.theme = 'dark'; else delete document.documentElement.dataset.theme; try { localStorage.setItem('ts-theme', dark ? 'dark' : 'light'); } catch(e) {} paintThemeBtn(); render(); };
+paintThemeBtn();
+addEventListener('resize', () => { clearTimeout(window.__rz); window.__rz = setTimeout(render, 200); });
+
+// ---------- 日历 ----------
 let calY, calM;
 function calLabel(d){
-  const l = Solar.fromYmd(d.getFullYear(), d.getMonth()+1, d.getDate()).getLunar();
-  const jq = l.getJieQi();
+  const l = Solar.fromYmd(d.getFullYear(), d.getMonth()+1, d.getDate()).getLunar(), jq = l.getJieQi();
   if (jq) return `<small class="jq">${jq}</small>`;
   if (l.getDay() === 1) return `<small class="jq">${l.getMonthInChinese()}月</small>`;
   return `<small>${l.getDayInChinese()}</small>`;
 }
 function renderCal(){
-  const first = new Date(calY, calM, 1, 12), days = new Date(calY, calM+1, 0).getDate();
-  const todayS = ymd(new Date()), selS = ymd(cur);
+  const first = new Date(calY, calM, 1, 12), days = new Date(calY, calM+1, 0).getDate(), todayS = ymd(new Date()), selS = ymd(cur);
   let years = ''; for (let y = 1900; y <= 2100; y++) years += `<option value="${y}" ${y===calY?'selected':''}>${y}年</option>`;
   let months = ''; for (let m = 0; m < 12; m++) months += `<option value="${m}" ${m===calM?'selected':''}>${m+1}月</option>`;
   let cells = '<span></span>'.repeat(first.getDay());
-  for (let d = 1; d <= days; d++) {
-    const dt = new Date(calY, calM, d, 12), s = ymd(dt);
-    cells += `<button type="button" data-day="${s}" class="${s===selS?'sel':''} ${s===todayS?'today':''}"><b>${d}</b>${calLabel(dt)}</button>`;
-  }
-  $('cal').innerHTML = `
-    <div class="cal-h">
-      <button type="button" class="iconbtn" data-cal="-1" aria-label="上个月">‹</button>
-      <div class="sel"><select id="calY" aria-label="年份">${years}</select><select id="calM" aria-label="月份">${months}</select></div>
-      <button type="button" class="iconbtn" data-cal="1" aria-label="下个月">›</button>
-    </div>
-    <div class="cal-w">${'日一二三四五六'.split('').map(w=>`<span>${w}</span>`).join('')}</div>
-    <div class="cal-g">${cells}</div>
+  for (let d = 1; d <= days; d++) { const dt = new Date(calY, calM, d, 12), s = ymd(dt); cells += `<button type="button" data-day="${s}" class="${s===selS?'sel':''} ${s===todayS?'today':''}"><b>${d}</b>${calLabel(dt)}</button>`; }
+  $('cal').innerHTML = `<div class="cal-h"><button type="button" class="iconbtn" data-cal="-1" aria-label="上个月">‹</button><div class="sel"><select id="calY" aria-label="年份">${years}</select><select id="calM" aria-label="月份">${months}</select></div><button type="button" class="iconbtn" data-cal="1" aria-label="下个月">›</button></div>
+    <div class="cal-w">${'日一二三四五六'.split('').map(w => `<span>${w}</span>`).join('')}</div><div class="cal-g">${cells}</div>
     <div class="cal-f"><button type="button" class="btn ghost" data-cal="today">今天</button><button type="button" class="btn ghost" data-cal="close">关闭</button></div>`;
   $('calY').onchange = e => { calY = +e.target.value; renderCal(); };
   $('calM').onchange = e => { calM = +e.target.value; renderCal(); };
@@ -682,55 +1102,53 @@ function closeCal(){ $('cal').hidden = true; $('calBack').hidden = true; $('date
 $('datePick').onclick = () => { $('cal').hidden ? openCal() : closeCal(); };
 $('calBack').onclick = closeCal;
 $('cal').addEventListener('click', e => {
-  const day = e.target.closest('[data-day]');
-  if (day) { cur = toDate(day.dataset.day); closeCal(); render(); return; }
-  const c = e.target.closest('[data-cal]'); if (!c) return;
-  const v = c.dataset.cal;
+  const day = e.target.closest('[data-day]'); if (day) { cur = toDate(day.dataset.day); openHour = null; closeCal(); render(); return; }
+  const c = e.target.closest('[data-cal]'); if (!c) return; const v = c.dataset.cal;
   if (v === 'close') return closeCal();
-  if (v === 'today') { cur = new Date(); cur.setHours(12,0,0,0); closeCal(); render(); return; }
-  calM += +v; if (calM < 0) { calM = 11; calY--; } if (calM > 11) { calM = 0; calY++; }
-  renderCal();
+  if (v === 'today') { cur = new Date(); cur.setHours(12,0,0,0); openHour = null; closeCal(); render(); return; }
+  calM += +v; if (calM < 0) { calM = 11; calY--; } if (calM > 11) { calM = 0; calY++; } renderCal();
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('cal').hidden) closeCal(); });
-$('cmp').onclick = e => { cmpMode = !cmpMode; e.target.classList.toggle('on', cmpMode); render(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('sheet').hidden) closeTerm(); if (!$('cal').hidden) closeCal(); } });
+
+// ---------- 统一点击 ----------
 document.addEventListener('click', e => {
+  const term = e.target.closest('[data-t]'); if (term) { const hr = term.closest('.hr'); const ctx = tab === 'me' ? null : hr ? (window.HOUR_CTX || [])[+hr.id.slice(2)] : window.DAY_CTX; openTerm(term.dataset.t, ctx, term.dataset.c); return; }
   const g = e.target.closest('[data-goto]'); if (g) { setTab(g.dataset.goto); return; }
+  const tog = e.target.closest('[data-toggle]'); if (tog) { const k = +tog.dataset.toggle; openHour = openHour === k ? -1 : k; render(); return; }
+  const hb = e.target.closest('[data-hour]'); if (hb) { openHour = +hb.dataset.hour; render(); requestAnimationFrame(() => { const el = $('hr' + openHour); if (el) el.scrollIntoView({ block:'nearest', behavior:'smooth' }); }); return; }
   const b = e.target.closest('.chk'); if (!b) return;
   const all = store.get(), k = ymd(cur)+'|'+b.dataset.key;
-  all[k] = all[k]===undefined ? 'ok' : all[k]==='ok' ? 'bad' : undefined;
-  if (all[k]===undefined) delete all[k];
+  all[k] = all[k]===undefined ? 'ok' : all[k]==='ok' ? 'bad' : undefined; if (all[k]===undefined) delete all[k];
   store.set(all); render();
 });
+$('cmp').onclick = e => { cmpMode = !cmpMode; e.target.classList.toggle('on', cmpMode); render(); };
 $('export').onclick = () => {
   const rows = [['日期','栏目','结果'], ...Object.entries(store.get()).map(([k,v]) => [...k.split('|'), v==='ok'?'一致':'不同'])];
-  const blob = new Blob(['﻿'+rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'});
+  const blob = new Blob(['﻿'+rows.map(r => r.join(',')).join('\n')], {type:'text/csv'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '通胜对比.csv'; a.click();
 };
 $('clear').onclick = () => { if (confirm('清除所有对比记录？')) { store.set({}); render(); } };
-document.addEventListener('keydown', e => { if (tab!=='today' || !$('cal').hidden || /INPUT|SELECT/.test(e.target.tagName)) return; if (e.key==='ArrowLeft') shift(-1); if (e.key==='ArrowRight') shift(1); });
+document.addEventListener('keydown', e => { if (tab === 'me' || tab === 'pick' || !$('cal').hidden || !$('sheet').hidden || /INPUT|SELECT/.test(e.target.tagName)) return; if (e.key === 'ArrowLeft') shift(-1); if (e.key === 'ArrowRight') shift(1); });
 
 const qs = new URLSearchParams(location.search);
 if (qs.get('birth')) profile = { date: qs.get('birth'), time: qs.get('time') || '', gender: qs.get('g') || '' };
-if (location.hash === '#me') tab = 'me';
+if (location.hash === '#me') tab = 'me'; else if (location.hash === '#hours') tab = 'hours'; else if (location.hash === '#pick') tab = 'pick';
 
 // ---------- 生辰下拉选单 ----------
 const pad = n => String(n).padStart(2,'0');
-const opt = (v, t) => `<option value="${v}">${t}</option>`;
+const opt = (v, x) => `<option value="${v}">${x}</option>`;
 (function initBirthSelects(){
   const thisY = new Date().getFullYear();
   let y = opt('', '年'); for (let i = thisY; i >= 1920; i--) y += opt(i, i+'年');
   let m = opt('', '月'); for (let i = 1; i <= 12; i++) m += opt(i, i+'月');
   let h = opt('', '不知道时辰'); for (let i = 0; i <= 23; i++) h += opt(i, `${pad(i)}点（${'子丑寅卯辰巳午未申酉戌亥'[Math.floor((i+1)/2)%12]}时）`);
   let mi = ''; for (let i = 0; i < 60; i++) mi += opt(i, pad(i)+'分');
-  $('meY').innerHTML = y; $('meM').innerHTML = m; $('meH').innerHTML = h; $('meMin').innerHTML = mi;
-  fillDays();
+  $('meY').innerHTML = y; $('meM').innerHTML = m; $('meH').innerHTML = h; $('meMin').innerHTML = mi; fillDays();
 })();
 function fillDays(){
-  const y = +$('meY').value || 2000, m = +$('meM').value || 1, keep = $('meD').value;
-  const n = new Date(y, m, 0).getDate();
+  const y = +$('meY').value || 2000, m = +$('meM').value || 1, keep = $('meD').value, n = new Date(y, m, 0).getDate();
   let d = opt('', '日'); for (let i = 1; i <= n; i++) d += opt(i, i+'日');
-  $('meD').innerHTML = d;
-  if (keep && +keep <= n) $('meD').value = keep;
+  $('meD').innerHTML = d; if (keep && +keep <= n) $('meD').value = keep;
 }
 $('meY').onchange = fillDays; $('meM').onchange = fillDays;
 $('meH').onchange = () => { $('meMin').disabled = $('meH').value === ''; };
@@ -738,21 +1156,23 @@ function fillForm(){
   if (!profile) { $('meMin').disabled = true; return; }
   const [y,m,d] = profile.date.split('-').map(Number);
   $('meY').value = y; $('meM').value = m; fillDays(); $('meD').value = d;
-  if (profile.time) { const [hh,mm] = profile.time.split(':').map(Number); $('meH').value = hh; $('meMin').value = mm; }
-  else { $('meH').value = ''; }
-  $('meMin').disabled = !profile.time;
-  $('meGender').value = profile.gender || '';
+  if (profile.time) { const [hh,mm] = profile.time.split(':').map(Number); $('meH').value = hh; $('meMin').value = mm; } else $('meH').value = '';
+  $('meMin').disabled = !profile.time; $('meGender').value = profile.gender || '';
 }
 $('meForm').onsubmit = e => {
   e.preventDefault();
   const y = $('meY').value, m = $('meM').value, d = $('meD').value;
   if (!y || !m || !d) { $('meErr').textContent = '请选择完整的出生年、月、日。'; $('meErr').hidden = false; return; }
-  $('meErr').hidden = true;
-  const h = $('meH').value;
+  $('meErr').hidden = true; const h = $('meH').value;
   profile = { date: `${y}-${pad(m)}-${pad(d)}`, time: h === '' ? '' : `${pad(h)}:${pad($('meMin').value)}`, gender: $('meGender').value };
   try { localStorage.setItem('ts-me', JSON.stringify(profile)); } catch(e) {}
   render();
 };
+$('natal').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.dy !== undefined) { natalDy = +b.dataset.dy; renderMe(); }
+  else if (b.dataset.ny) { natalYear += +b.dataset.ny; renderMe(); }
+});
 $('meClear').onclick = () => { profile = null; try { localStorage.removeItem('ts-me'); } catch(e) {} $('meForm').reset(); fillDays(); $('meMin').disabled = true; $('meErr').hidden = true; render(); };
 fillForm();
 render();
