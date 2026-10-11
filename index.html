@@ -245,6 +245,16 @@ button,input,select{font:inherit;color:inherit}
 .ssr .pil b{display:inline-block;font-weight:600;font-size:12.5px;color:var(--ink);background:var(--surface);border:1px solid var(--line-2);border-radius:3px;padding:0 5px;margin-right:3px}
 .ssr .how{font-size:12.5px;color:var(--muted);line-height:1.4} .ssr .how i{font-style:normal;display:block;font-size:11.5px;opacity:.85}
 @media (max-width:639px){ .ssr{grid-template-columns:84px minmax(0,1fr)} .ssr .how{grid-column:1 / -1;padding-left:2px} }
+.ysgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (min-width:640px){ .ysgrid{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.ysc{border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;background:var(--surface)}
+.ysh{display:flex;align-items:baseline;gap:6px;margin-bottom:6px;font-size:12.5px} .ysh b{font-size:20px;font-weight:700}
+.ysl{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:4px 0;font-size:13px}
+.ysl+.ysl{border-top:1px dashed var(--line)}
+.ysl .tag{font-size:11px;font-weight:700;padding:0 5px;border-radius:3px;margin-right:2px}
+.ysl.good .tag{background:var(--good);color:var(--on-good)} .ysl.bad .tag{background:var(--bad);color:var(--on-bad)}
+.ys{font:inherit;font-size:13px;padding:1px 7px;border-radius:3px;border:1px solid transparent;cursor:pointer;line-height:1.5}
+.ysl.good .ys{color:var(--good);background:var(--good-soft)} .ysl.bad .ys{color:var(--bad);background:var(--bad-soft)}
 .dysha{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 4px;margin-top:4px;padding-top:4px;border-top:1px dashed var(--line);font-size:11px;line-height:1.4;width:100%}
 .dysha i{font-style:normal;padding:0 3px;border-radius:3px}
 .dysha i.good{color:var(--good);background:var(--good-soft)} .dysha i.bad{color:var(--bad);background:var(--bad-soft)} .dysha i.mid{color:var(--mid);background:var(--mid-soft)}
@@ -734,6 +744,10 @@ function natalCard(n){
   const yongEl = x.yong ? (n.me + ROLES.indexOf(x.yong)) % 5 : null, pw = P.power(n), rel = P.relations(n), kong = ec.getDayXunKong(), gua = mingGua(n);
   const shaP = P.natalShensha(n), ssAll = P.shenshaAll(n);
   const extraSha = gz => P.shenshaAll(n, gz).filter(r => r.hits.includes(4));
+  const starTable = (gz, title) => { const a = P.annualStars(n, gz);
+    return `<div class="relh">${title}</div><div class="ysgrid">${[0,1,2,3].map(k => n.zhi[k] ? `<div class="ysc"><div class="ysh"><span class="muted">${'年月日时'[k]}支</span><b class="serif">${zhiC(n.zhi[k])}</b></div>
+      <div class="ysl good"><span class="tag">吉</span>${a[k].good.length ? a[k].good.map(x => `<button class="ys" data-t="${x.name}" data-c="流年吉凶星" title="${x.desc}">${x.name}</button>`).join('') : '<span class="muted">—</span>'}</div>
+      <div class="ysl bad"><span class="tag">凶</span>${a[k].bad.length ? a[k].bad.map(x => `<button class="ys" data-t="${x.name}" data-c="流年吉凶星" title="${x.desc}">${x.name}</button>`).join('') : '<span class="muted">—</span>'}</div></div>` : '').join('')}</div>`; };
   const shaLine = gz => { const h = extraSha(gz); return h.length ? `<span class="dysha">${h.map(r => `<i class="${r.good}">${r.name}</i>`).join('')}</span>` : '<span class="dysha muted">—</span>'; };
   const sxOf = z => `${z}（${P.SX[P.zi(z)]}）`, ns = (tbl, key) => [...(tbl[key] || '')].map(sxOf).join('、');
   const info = [
@@ -801,6 +815,7 @@ function natalCard(n){
     <div class="relh">${dySel.getGanZhi()}运的流年</div>
     <div class="lngrid">${dySel.getLiuNian().map(y => { const gz = y.getGanZhi();
       return `<div class="${y.getYear() === curY ? 'cur' : ''}"><span>${y.getYear()}</span><b>${ganC(gz[0])}${zhiC(gz[1])}</b><span>${P.shiShen(n.dayGan, gz[0])}</span><span class="muted">${y.getYear() - by}岁</span>${shaLine(gz)}</div>`; }).join('')}</div>
+    ${starTable(dySel.getGanZhi(), `${dySel.getGanZhi()}运 对你四柱的吉凶星`)}
     <div class="note">按《三命通会》「三日折一岁」推算交运时间，岁数为周岁（不进位）。每格下方是这步大运／流年的干支引动你命中的神煞（绿吉、红凶、灰中性）。</div>` : '<p class="muted" style="margin:0">选择性别后即可排出大运。</p>'}
   </section>
   <section class="card">
@@ -809,6 +824,8 @@ function natalCard(n){
       <dt>流年</dt><dd><b class="serif">${ganC(lyGz[0])}${zhiC(lyz)}年</b>　天干${t(P.shiShen(n.dayGan, lyGz[0]))}，地支${t(ssZ(lyz))}</dd>
       <dt>太岁</dt><dd>${taiSui.length ? taiSui.map(x => `<span class="badge bad">${x}</span>`).join(' ') : '<span class="muted">没有冲犯太岁</span>'}</dd>
     </dl>
+    ${starTable(lyGz, `${lyGz}年 对你四柱的吉凶星`)}
+    <div class="relh">流月</div>
     <div class="lygrid">${months.map(m => { const r = zhiRelOf(m.zhi, n.zhi[2]).find(r => r.t === '冲' || r.t === '六合' || r.t === '三合');
       return `<div><span class="mn">${MONTH_CN[m.i]}月</span><b>${ganC(m.gz[0])}${zhiC(m.gz[1])}</b><span>${P.shiShen(n.dayGan, m.gz[0])}</span><span class="muted">${m.start.getMonth()}/${m.start.getDay()} 起</span>${r ? `<span class="tag ${r.bad ? 'bad' : 'good'}">${r.t === '冲' ? '冲日柱' : '合日柱'}</span>` : ''}</div>`; }).join('')}</div>
     <div class="note">流月以节气交接为准（例如立春起正月）。「冲日柱」「合日柱」指那个月和你日柱的关系。</div>

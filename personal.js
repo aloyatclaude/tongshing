@@ -436,6 +436,74 @@ function shenshaAll(n, extra){   // extra: 干支字符串（大运或流年）�
   [1,2,3].forEach(k => { if (pil[k] && YINYANG_CUO.includes(pil[k])) put(k, '阴差阳错'); });
   return SS_RULES.map(([name, how, src, good]) => ({name, how, src, good, hits: hits[name]}));
 }
+// ---------- 流年／大运吉凶星：以流年（或大运）干支为太岁，逐一对你的年月日时四支起神煞 ----------
+// 骨干：太岁十二神，唐·李淳风「四利三元」（《御定星历考原》卷五）：太岁 太阳 丧门 太阴 官符 死符 岁破 龙德 白虎 福德 吊客 病符，顺行。
+// 附星：张果星宗〈驾前神煞歌〉（《古今图书集成》艺术典卷568）、《星学大成》卷三各「定例」。按「本命支 − 流年支」的位移查。
+const TY_OFF = [
+  [['太岁','bad'],['岁驾','good'],['剑锋','bad'],['伏尸','bad']],
+  [['太阳','good'],['天空','bad']],
+  [['丧门','bad'],['地丧','bad']],
+  [['太阴','good'],['贯索','bad'],['勾神','bad']],
+  [['官符','bad'],['五鬼','bad'],['飞符','bad'],['年符','bad']],
+  [['死符','bad'],['小耗','bad'],['月德','good']],
+  [['岁破','bad'],['大耗','bad']],
+  [['龙德','good'],['暴败','bad'],['天厄','bad']],
+  [['白虎','bad'],['天雄','bad']],
+  [['福德','good'],['卷舌','bad'],['绞煞','bad']],
+  [['吊客','bad'],['天狗','bad']],
+  [['病符','bad'],['陌越','bad']],
+];
+// 逆行星（子年起某支，逐年逆数）：红鸾卯、天喜酉、天解/血刃戌、天哭午、披头辰（星宗〈驾后神煞歌〉、星学大成卷三）
+const TY_REV = [['红鸾',3,'good'],['天喜',9,'good'],['天解',10,'good'],['血刃',10,'bad'],['天哭',6,'bad'],['披头',4,'bad']];
+const DIJIE = ['未','未','申','申','酉','酉','戌','戌','亥','亥','午','午'];   // 地解（星宗表：子丑未、寅卯申、辰巳酉、午未戌、申酉亥、戌亥午）
+const FEILIAN = ['申','酉','戌','巳','午','未','寅','卯','辰','亥','子','丑'];  // 飞廉／大煞（协纪辨方书卷三引广圣历）
+const TY_DESC = {
+  太岁:'流年太岁临到这一柱，变动大、压力大，凡事宜守', 岁驾:'太岁亲临，吉星同到则吉、凶星同到则凶', 剑锋:'防刀伤、手术、争执', 伏尸:'防意外、暗病',
+  太阳:'光明之星，利男性长辈、贵人提携', 天空:'事情容易落空，吉凶都被削弱',
+  丧门:'防家中长辈健康、孝服', 地丧:'与丧门相似，力轻',
+  太阴:'利女性长辈，暗中得助', 贯索:'防牵连、拘束', 勾神:'防是非勾连',
+  官符:'防官非、文书纠纷', 五鬼:'防小人暗害、钱财暗损', 飞符:'防飞来横祸、口舌', 年符:'与官符相似',
+  死符:'防疾病、晦气', 小耗:'小破财', 月德:'能化凶为吉',
+  岁破:'冲太岁，变动最大，大事宜避', 大耗:'大破财，防失窃',
+  龙德:'逢凶化吉，有贵人', 暴败:'防突然的败落', 天厄:'防灾厄',
+  白虎:'防血光、意外、官非', 天雄:'防是非',
+  福德:'福气临门，能化煞', 卷舌:'防口舌是非', 绞煞:'防纠缠牵绊',
+  吊客:'防丧事、忌探病', 天狗:'防血光、小人；忌子女宫',
+  病符:'防疾病缠身', 陌越:'吉星力量减半，做事难成',
+  红鸾:'喜事、婚姻、感情的机会', 天喜:'喜事、好消息', 天解:'能解难', 血刃:'防血光、外伤', 天哭:'防伤心、忧患', 披头:'防孝服、忧丧', 地解:'能释凶',
+  飞廉:'防横祸、非灾', 岁煞:'对你不利的煞方到位，防灾病',
+};
+const YR_DESC = {
+  将星:'有权柄、受重用', 扳鞍:'将星之后，宜稳不宜急', 华盖:'宜静、利学习玄学', 黄幡:'宜静不宜动，防停滞', 豹尾:'防口舌、小人',
+  驿马:'多走动、变动', 桃花:'人缘旺', 劫煞:'防意外损失', 灾煞:'防灾病', 亡神:'防疏忽失误',
+  岁合:'与太岁相合，和顺得助', 岁刑:'与太岁相刑，防是非刑伤', 晦气:'日干或时干合住太岁，运气晦暗',
+  天乙贵人:'流年贵人到，得人相助', 文昌:'利考试文书', 禄神:'利收入', 羊刃:'防冲动受伤', 金舆:'得助力、生活顺', 红艳:'魅力增', 流霞:'防意外血光', 福星贵人:'福气到', 国印贵人:'利职权', 太极贵人:'利学问',
+};
+function annualStars(n, gz){
+  const lg = gz[0], lz = gz[1], li = zi(lz), out = [0,1,2,3].map(() => ({good:[], bad:[]}));
+  const add = (k, name, good, desc) => { const arr = good ? out[k].good : out[k].bad; if (!arr.some(x => x.name === name)) arr.push({name, desc}); };
+  const [ma, tao, hua, jiang, jie, wang] = SANHE4[li % 4], zai = ZHI[(zi(jiang) + 6) % 12], sui = ZHI[(zi(jie) + 2) % 12], bao = ZHI[(zi(hua) + 6) % 12], ban = ZHI[(zi(jiang) + 1) % 12];
+  [0,1,2,3].forEach(k => { const z = n.zhi[k]; if (!z) return; const d = (zi(z) - li + 12) % 12;
+    TY_OFF[d].forEach(([name, g]) => add(k, name, g === 'good', TY_DESC[name]));
+    TY_REV.forEach(([name, start, g]) => { if (ZHI[(start - li + 12) % 12] === z) add(k, name, g === 'good', TY_DESC[name]); });
+    if (DIJIE[li] === z) add(k, '地解', true, TY_DESC.地解);
+    if (FEILIAN[li] === z) add(k, '飞廉', false, TY_DESC.飞廉);
+    zhiRel(lz, z).forEach(r => { if (r.t === '六合') add(k, '岁合', true, YR_DESC.岁合); if (r.t === '刑') add(k, '岁刑', false, YR_DESC.岁刑); });
+    if (z === jiang) add(k, '将星', true, YR_DESC.将星); if (z === ban) add(k, '扳鞍', false, YR_DESC.扳鞍);
+    if (z === hua) { add(k, '华盖', true, YR_DESC.华盖); add(k, '黄幡', false, YR_DESC.黄幡); } if (z === bao) add(k, '豹尾', false, YR_DESC.豹尾);
+    if (z === ma) add(k, '驿马', true, YR_DESC.驿马); if (z === tao) add(k, '桃花', true, YR_DESC.桃花);
+    if (z === jie) add(k, '劫煞', false, YR_DESC.劫煞); if (z === zai) add(k, '灾煞', false, YR_DESC.灾煞); if (z === sui) add(k, '岁煞', false, TY_DESC.岁煞); if (z === wang) add(k, '亡神', false, YR_DESC.亡神);
+    // 流年天干系神煞落在你的地支
+    if (NS.天乙[lg].includes(z)) add(k, '天乙贵人', true, YR_DESC.天乙贵人); if (NS.文昌星[lg].includes(z)) add(k, '文昌', true, YR_DESC.文昌);
+    if (NS.禄[lg] === z) add(k, '禄神', true, YR_DESC.禄神); if (NS.羊刃[lg] === z) add(k, '羊刃', false, YR_DESC.羊刃);
+    if (NS.金舆[lg] === z) add(k, '金舆', true, YR_DESC.金舆); if (NS.红艳[lg] === z) add(k, '红艳', true, YR_DESC.红艳); if (NS.流霞[lg] === z) add(k, '流霞', false, YR_DESC.流霞);
+    if (NS.福星[lg].includes(z)) add(k, '福星贵人', true, YR_DESC.福星贵人); if (NS.国印[lg] === z) add(k, '国印贵人', true, YR_DESC.国印贵人); if (NS.太极[lg].includes(z)) add(k, '太极贵人', true, YR_DESC.太极贵人);
+  });
+  // 晦气：日干或时干与太岁天干相合（三命通会卷二）
+  [2,3].forEach(k => { if (n.gan[k] && ganHe(n.gan[k], lg)) add(k, '晦气', false, YR_DESC.晦气); });
+  return out;
+}
+
 function natalShensha(n){ const out = [[],[],[],[]]; shenshaAll(n).forEach(r => r.hits.forEach(k => { if (k < 4) out[k].push(r.name); })); return out; }
 
 function dayHours(n, l){
@@ -445,5 +513,5 @@ function dayHours(n, l){
   return {hours, best, avoid};
 }
 
-return {GAN, ZHI, WX, GAN_WX, ZHI_WX, SX, SS_DESC, SHA_DESC, PALACE_SHORT, shiShen, shiShenZhi, build, today, hourTags, hourSha, hourPersonal, dayHours, luckyColor, changSheng, relations, power, liuYue, natalShensha, shenshaAll, SS_RULES, ZHI_MAIN, zhiRelPublic: zhiRel, gi, zi};
+return {GAN, ZHI, WX, GAN_WX, ZHI_WX, SX, SS_DESC, SHA_DESC, PALACE_SHORT, shiShen, shiShenZhi, build, today, hourTags, hourSha, hourPersonal, dayHours, luckyColor, changSheng, relations, power, liuYue, natalShensha, shenshaAll, SS_RULES, annualStars, ZHI_MAIN, zhiRelPublic: zhiRel, gi, zi};
 })();
